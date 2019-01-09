@@ -34,6 +34,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	RoomPropertyKeys rpk;
 	PhotonView pv;
 	GameObject stoneManger;
+	List<int> playerColors;
 
 	// Initialization
 	void Start ()
@@ -42,6 +43,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		rpk = new RoomPropertyKeys();
 		pv = this.GetComponent<PhotonView> ();
 		stoneManger = GameObject.Find ("_StoneManager");
+		playerColors = new List<int> ();
 	}
 
 	public override void OnLeftRoom ()
@@ -95,7 +97,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		GameObject.Find ("GameMenu").GetComponent<SubMenu> ()
 			.UpdatePlayers ((string)PhotonNetwork.CurrentRoom.CustomProperties[rpk.playerOneName]
-				, (string)PhotonNetwork.CurrentRoom.CustomProperties[rpk.playerTwoName]);
+				, (string)PhotonNetwork.CurrentRoom.CustomProperties[rpk.playerTwoName], 0, 0);
 
 		GameObject.Find ("GameMenu").GetComponent<SubMenu> ().JoinRoom (PhotonNetwork.CurrentRoom.Name);
 	}
@@ -120,18 +122,41 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 			PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 
-			pv.RPC ("SubMenuPlayerSettings", RpcTarget.All, (string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName]);
+			SetPlayerColors (2); // TODO: Set per room settings in the future for more than 2 players.
+			ResetCurrentTurn(0); // 0 is black. Change to default first color in the future.
+
+			for(int i=0; i<playerColors.Count;i++){Debug.Log (i.ToString() + ": color: "  + playerColors[i]);}
+
+			pv.RPC ("SubMenuPlayerSettings", RpcTarget.All, (string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName], playerColors[0], playerColors[1]);
+		}
+	}
+
+	// Set the colors of the players in the room.
+	private void SetPlayerColors (int maxPlayers)
+	{
+		playerColors = GameObject.Find ("_Scripts").GetComponent<RandomScript>().RandomIntStartList(0, maxPlayers);
+
+	}
+
+	// Set current turn to the given color
+	private void ResetCurrentTurn (int color)
+	{
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		for(int i=0; i<playerColors.Count;i++)
+		{
+			if(playerColors[i] == color){hash [rpk.currentTurn] = i; break;}
 		}
 	}
 
 	// Call all the clients to set up the players
 	// settings in the sub menu.
 	[PunRPC]
-	private void SubMenuPlayerSettings (string pOne, string pTwo)
+	private void SubMenuPlayerSettings (string pOne, string pTwo, int pOneColor, int pTwoColor)
 	{
 		GameObject gameMenu = GameObject.Find ("GameMenu");
 
-		gameMenu.GetComponent<SubMenu> ().UpdatePlayers (pOne, pTwo);
+		gameMenu.GetComponent<SubMenu> ().UpdatePlayers (pOne, pTwo, pOneColor, pTwoColor);
 		gameMenu.GetComponent<SubMenu> ().StartGameSetup ();
 	}
 

@@ -35,4 +35,40 @@ public class RandomScript : MonoBehaviour {
 
 		return num;
 	}
+
+	// Create a list of int and randomize what number starts.
+	// max must be greater than min. Max is excluded.
+	public List<int> RandomIntStartList (int min, int max)
+	{
+		List<int> nums = new List<int> ();
+
+		if( min >= max )
+		{
+			Debug.Log ("ERROR: Min greater or equal to max.");
+			return null;
+		}
+			
+		int start = Random.Range (min, max);
+
+		for(int i=0; i<100; i++)
+		{
+			start = Random.Range (min, max);
+		}
+
+		for (int i=min;i<max;i++)
+		{
+			nums.Add (i);
+		}
+
+		List<int> newNums = new List<int> ();
+
+		for(int i=0; i<nums.Count;i++)
+		{
+			if(i==0){newNums.Add(nums[start]);}
+			else if (i+start < nums.Count) {newNums.Add (nums[start+i]);}
+			else if (i+start >= nums.Count){newNums.Add (nums[start+i-nums.Count]);}
+		}
+
+		return newNums;
+	}
 }

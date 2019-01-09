@@ -30,7 +30,7 @@ public class SubMenu : MonoBehaviour {
 	}
 
 	// Update the player information in a room.
-	public void UpdatePlayers (string playerOne, string playerTwo)
+	public void UpdatePlayers (string playerOne, string playerTwo, int pOneColor, int pTwoColor)
 	{
 		TextMeshProUGUI pOneUser = pOneUsername.GetComponent<TextMeshProUGUI> ();
 		TextMeshProUGUI pTwoUser = pTwoUsername.GetComponent<TextMeshProUGUI> ();
@@ -38,6 +38,9 @@ public class SubMenu : MonoBehaviour {
 		pOneUser.text = playerOne;
 		pTwoUser.text = playerTwo;
 
+		// TODO: Adjust the functions below to use only SetPlayerColors in the future.
+		SetPlayerColor (0, pOneColor);
+		SetPlayerColor (1, pTwoColor);
 	}
 
 	// Set the colors of the play information image
@@ -62,6 +65,21 @@ public class SubMenu : MonoBehaviour {
 		// Set Colors
 		pOneColor.color = defaultColors[colors[0]];
 		pTwoColor.color = defaultColors[colors[1]];
+	}
+
+	// TODO: Deprecate this and use SetPlayerColors only in the future.
+	public void SetPlayerColor (int player, int color)
+	{
+		List<Color> defaultColors = new List<Color> ();
+		defaultColors.Add (Color.black);
+		defaultColors.Add (Color.white);
+
+		List<Image> players = new List<Image> ();
+		players.Add (pOneColor);
+		players.Add (pTwoColor);
+
+		players [player].color = defaultColors [color];
+
 	}
 
 	// When the game starts, setup room and start
