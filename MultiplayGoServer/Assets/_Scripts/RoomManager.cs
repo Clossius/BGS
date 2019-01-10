@@ -35,6 +35,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	PhotonView pv;
 	GameObject stoneManger;
 	List<int> playerColors;
+	List<string> players;
 
 	// Initialization
 	void Start ()
@@ -127,6 +128,10 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 			for(int i=0; i<playerColors.Count;i++){Debug.Log (i.ToString() + ": color: "  + playerColors[i]);}
 
+			players = new List<string>();
+			players.Add ((string)hash[rpk.playerOneName]);
+			players.Add ((string)hash[rpk.playerTwoName]);
+
 			pv.RPC ("SubMenuPlayerSettings", RpcTarget.All, (string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName], playerColors[0], playerColors[1]);
 		}
 	}
@@ -145,8 +150,10 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		for(int i=0; i<playerColors.Count;i++)
 		{
-			if(playerColors[i] == color){hash [rpk.currentTurn] = i; break;}
+			if(playerColors[i] == color){hash [rpk.currentTurn] = i;}
 		}
+
+		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 	}
 
 	// Call all the clients to set up the players
@@ -201,15 +208,42 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		// TODO: Add a way to load and save moves on the server.
 
-		pv.RPC ("PlayMovesOnAllClients", RpcTarget.All, move);
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		if(username == players[(int)hash[rpk.currentTurn]])
+		{
+			pv.RPC ("PlayMovesOnAllClients", RpcTarget.All, move, playerColors[(int)hash[rpk.currentTurn]]);
+
+			ChangeTurn ();
+		}
 	}
 
 	[PunRPC]
-	private void PlayMovesOnAllClients (string move)
+	private void PlayMovesOnAllClients (string move, int color)
 	{
 		//TODO: Set up a way to load the moves from the server
 		// in case of disconnection and rejoining or for viewers who join
 		// late.
-		stoneManger.GetComponent<StoneManagerScript> ().CreateStone (move, 0);
+		stoneManger.GetComponent<StoneManagerScript> ().CreateStone (move, color);
 	}
+
+	private void ChangeTurn ()
+	{
+		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected) 
+		{
+			Debug.Log ("Not Master client.");
+			return;
+		}
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		int currentTurn = (int)hash [rpk.currentTurn];
+		currentTurn++;
+
+		if(currentTurn >= players.Count){ currentTurn = 0;}
+
+		hash [rpk.currentTurn] = currentTurn;
+		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
+	}
+
 }
