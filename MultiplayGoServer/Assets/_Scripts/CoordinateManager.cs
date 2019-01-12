@@ -95,6 +95,8 @@ public class CoordinateManager : MonoBehaviour {
 
 		string letter = "";
 
+		if (num < 0 || num >= letters.Count*2){Debug.Log ("ERROR: Number provided out of Range. Num: " + num.ToString());}
+
 		if (num < letters.Count && num >= 0) {
 			letter = letters [num];
 		} else if (num < (letters.Count * 2)) {
@@ -169,23 +171,22 @@ public class CoordinateManager : MonoBehaviour {
 
 
 	// Return the x int coordinate.
-	public int GetXInt (string coordinate)
+	public int GetXInt (string coordinate, int boardSize)
 	{
 		List<string> letters = GetLetters ();
 		int index = -1;
-		int maxSize = GameObject.Find ("_GobanManager").GetComponent<DrawLineScript> ().GetMaxBoardSize ();
 
 		for (int i=0; i<(letters.Count*2); i++)
 		{
-			for (int g=0; g<maxSize;g++)
+			for (int g=0; g<boardSize;g++)
 			{
 				if (i < letters.Count) {
-					string coor = letters [i] + g.ToString ();
+					string coor = letters [i] + (g+1).ToString ();
 					if (coor == coordinate) {
 						index = i;
 					}
 				} else {
-					string coor = letters [i-letters.Count] + letters[i-letters.Count] + g.ToString ();
+					string coor = letters [i-letters.Count] + letters[i-letters.Count] + (g+1).ToString ();
 					if (coor == coordinate) {
 						index = i;
 					}
@@ -194,29 +195,28 @@ public class CoordinateManager : MonoBehaviour {
 			}
 		}
 
-		if (index == -1){Debug.Log ("ERROD: -1 Could not find coordinate.");}
+		if (index == -1){Debug.Log ("ERROR: -1 Could not find coordinate.");}
 
 		return index;
 	}
 
 	// Return the z int coordinate.
-	public int GetZInt (string coordinate)
+	public int GetZInt (string coordinate, int boardSize)
 	{
 		List<string> letters = GetLetters ();
 		int index = -1;
-		int maxSize = GameObject.Find ("_GobanManager").GetComponent<DrawLineScript> ().GetMaxBoardSize ();
 
 		for (int i=0; i<(letters.Count*2); i++)
 		{
-			for (int g=0; g<maxSize;g++)
+			for (int g=0; g<boardSize;g++)
 			{
 				if (i < letters.Count) {
-					string coor = letters [i] + g.ToString ();
+					string coor = letters [i] + (g).ToString ();
 					if (coor == coordinate) {
 						index = g;
 					}
 				} else {
-					string coor = letters [i-letters.Count] + letters[i-letters.Count] + g.ToString ();
+					string coor = letters [i-letters.Count] + letters[i-letters.Count] + (g).ToString ();
 					if (coor == coordinate) {
 						index = g;
 					}
@@ -225,7 +225,7 @@ public class CoordinateManager : MonoBehaviour {
 			}
 		}
 
-		if (index == -1){Debug.Log ("ERROD: -1 Could not find coordinate.");}
+		if (index == -1){Debug.Log ("ERROR: -1 Could not find coordinate.");}
 
 		return index;
 	}

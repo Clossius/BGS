@@ -68,7 +68,7 @@ public class StoneManagerScript : MonoBehaviour {
     }
 		
 	// Set color of the stone.
-	void SetStoneColor (GameObject stone, int color)
+	private void SetStoneColor (GameObject stone, int color)
 	{
 		stone.GetComponent<Renderer> ().material.color = Color.black;
 		if (color == 1) {
@@ -115,4 +115,7 @@ public class StoneManagerScript : MonoBehaviour {
 
 		return colors;
 	}
+
+
+
 }

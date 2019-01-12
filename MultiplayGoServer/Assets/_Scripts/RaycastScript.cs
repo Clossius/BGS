@@ -24,7 +24,6 @@ public class RaycastScript : MonoBehaviour {
 			// Check if the game is active
 			bool activeGame = GameObject.FindGameObjectWithTag("RoomManager").GetComponent<RoomManager>().CanPlayMove();
 
-
 			// Check if it is our turn.
 
 			if(activeGame)

@@ -126,8 +126,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			SetPlayerColors (2); // TODO: Set per room settings in the future for more than 2 players.
 			ResetCurrentTurn(0); // 0 is black. Change to default first color in the future.
 
-			for(int i=0; i<playerColors.Count;i++){Debug.Log (i.ToString() + ": color: "  + playerColors[i]);}
-
 			players = new List<string>();
 			players.Add ((string)hash[rpk.playerOneName]);
 			players.Add ((string)hash[rpk.playerTwoName]);
@@ -171,7 +169,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	public override void OnRoomPropertiesUpdate (ExitGames.Client.Photon.Hashtable propertiesThatChanged)
 	{
 		base.OnRoomPropertiesUpdate (propertiesThatChanged);
-		Debug.Log (propertiesThatChanged);
+		//Debug.Log (propertiesThatChanged);
 	}
 
 	// Get if the current player can play a move
@@ -225,6 +223,21 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		// in case of disconnection and rejoining or for viewers who join
 		// late.
 		stoneManger.GetComponent<StoneManagerScript> ().CreateStone (move, color);
+
+		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){ return;}
+
+		List<Stone> stones = GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript>().GetStones();
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		bool capture = CheckForCaptures (stones, (int)hash[rpk.boardSize]);
+
+		Debug.Log (stones[stones.Count-1].coordinate + " "  + capture.ToString());
+
+		if (capture)
+		{
+			Debug.Log ("Something Captured!");
+		}
 	}
 
 	private void ChangeTurn ()
@@ -246,4 +259,21 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 	}
 
+	// Check if anything has been captured.
+	// Returns true if any stone has 0 liberties.
+	private bool CheckForCaptures (List<Stone> stones, int boardSize)
+	{
+		bool capture = false;
+
+		for (int i=0; i<stones.Count; i++)
+		{
+			int liberties = GameObject.Find ("_StoneManager").GetComponent<LibertyManager> ().GetLiberties (stones[i].coordinate, stones, boardSize);
+
+			Debug.Log (stones[i].coordinate + " : " + liberties.ToString());
+
+			if (liberties == 0){ capture = true; }
+		}
+
+		return capture;
+	}
 }
