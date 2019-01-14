@@ -36,4 +36,5 @@ MonoBehaviour:
   - SubMenuPlayerSettings
   - PlayMoveOverNetwork
   - PlayMovesOnAllClients
+  - NetworkRemoveCapture
   DisableAutoOpenWizard: 1

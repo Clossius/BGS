@@ -206,14 +206,38 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		// TODO: Add a way to load and save moves on the server.
 
-		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
 		if(username == players[(int)hash[rpk.currentTurn]])
 		{
-			pv.RPC ("PlayMovesOnAllClients", RpcTarget.All, move, playerColors[(int)hash[rpk.currentTurn]]);
+			// Check for legal move.
+			hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
-			ChangeTurn ();
+			stoneManger.GetComponent<StoneManagerScript> ().CreateStone (move, playerColors[(int)hash[rpk.currentTurn]]);
+			List<Stone> stones = stoneManger.GetComponent<StoneManagerScript> ().GetStones ();
+			bool legal = CheckForSuicideMove (move, stones, (int)hash[rpk.boardSize]);
+			Debug.Log ("Legal move: " + legal.ToString());
+			stoneManger.GetComponent<StoneManagerScript> ().RemoveMove (move);
+
+			if (legal)
+			{
+				pv.RPC ("PlayMovesOnAllClients", RpcTarget.All, move, playerColors[(int)hash[rpk.currentTurn]]);
+
+			}
 		}
+	}
+
+	// Check if the move played has any liberties. If not,
+	// return false unless capturing something.
+	private bool CheckForSuicideMove (string move, List<Stone> stones, int boardSize)
+	{
+		bool legal = true;
+
+		int liberties = stoneManger.GetComponent<LibertyManager> ().GetLiberties (move, stones, boardSize);
+		bool capturing = stoneManger.GetComponent<LibertyManager> ().CheckForCapturing (move, stones, boardSize);
+
+		if(liberties == 0 && !capturing){legal = false;}
+
+		return legal;
 	}
 
 	[PunRPC]
@@ -232,12 +256,36 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		bool capture = CheckForCaptures (stones, (int)hash[rpk.boardSize]);
 
-		Debug.Log (stones[stones.Count-1].coordinate + " "  + capture.ToString());
-
+		// Check for win condition.
 		if (capture)
 		{
 			Debug.Log ("Something Captured!");
+			// TODO: Check if the rule set is capture Go or not.
+			GameOver();
 		}
+
+		ChangeTurn ();
+	}
+
+	private void GameOver ()
+	{
+		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){ return;}
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		for (int i=0; i<playerColors.Count; i++)
+		{
+			if ((int)hash[rpk.currentTurn] != i)
+			{
+				pv.RPC ("NetworkRemoveCapture", RpcTarget.All, playerColors[i], (int)hash[rpk.boardSize]);
+			}
+		}
+	}
+
+	[PunRPC]
+	public void NetworkRemoveCapture (int color, int boardSize)
+	{
+		stoneManger.GetComponent<StoneManagerScript> ().RemoveCaptureColor (color, boardSize);
 	}
 
 	private void ChangeTurn ()

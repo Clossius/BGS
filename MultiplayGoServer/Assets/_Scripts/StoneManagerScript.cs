@@ -116,6 +116,69 @@ public class StoneManagerScript : MonoBehaviour {
 		return colors;
 	}
 
+	// Remove a stone that matches the position given.
+	public void RemoveMove (string move)
+	{
+		int index = -1;
 
+		for (int i=0; i<stones.Count; i++)
+		{
+			if(stones[i].coordinate == move){index = i;}
+		}
 
+		if(index == -1){Debug.Log ("ERROR: Move not found."); return;}
+
+		RemoveStoneAt (index);
+	}
+
+	// Remove multiple moves that match the coordinates given.
+	public void RemoveMultipleMoves (List<string> moves)
+	{
+		for (int i=0; i<moves.Count; i++)
+		{
+			for (int g=0; g<stones.Count; g++)
+			{
+				if (moves[i] == stones[g].coordinate)
+				{
+					RemoveStoneAt (g);
+					g = 0;
+				}
+			}
+		}
+	}
+
+	// Remove a stone at a given index
+	public void RemoveStoneAt (int index)
+	{
+		if(stones[index] == null)
+		{
+			Debug.Log ("ERROR: Nothing found at index.");
+			return;
+		}
+		Debug.Log ("Removing Stone at " + stones[index].coordinate);
+		Destroy (stones[index].stone);
+		stones.RemoveAt (index);
+	}
+
+	// Remove the stones that have 0 liberties that are
+	// of the color provided.
+	public void RemoveCaptureColor (int color, int boardSize)
+	{
+		for (int i=0; i<stones.Count;i++)
+		{
+			if (stones[i].color == color)
+			{
+				int liberty = this.GetComponent<LibertyManager> ().GetLiberties (stones[i].coordinate, stones, boardSize);
+
+				if(liberty == 0)
+				{
+					List<string> moves = this.GetComponent<LibertyManager> ().GetStringOfMoves (stones[i].coordinate, stones, boardSize);
+
+					RemoveMultipleMoves (moves);
+
+					i = 0;
+				}
+			}
+		}
+	}
 }

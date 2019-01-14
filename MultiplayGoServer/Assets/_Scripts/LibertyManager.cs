@@ -259,4 +259,25 @@ public class LibertyManager : MonoBehaviour {
 
 		return moves;
 	}
+
+	// Check surrounding moves of the move played. If the colors are not the same, check the liberties.
+	// If any of the surrounding moves have 0 liberties, return true that the move provided
+	// captured something.
+	public bool CheckForCapturing (string move, List<Stone> stones, int boardSize)
+	{
+		bool capturing = false;
+
+		List<string> movesToCheck = GetTouchingCoordinates (move, boardSize);
+		for (int i=0; i<movesToCheck.Count;i++)
+		{
+			bool moveExist = CheckMoveExist (movesToCheck[i], stones);
+			if(moveExist)
+			{
+				int liberties = GetLiberties (movesToCheck[i], stones, boardSize);
+				if(liberties == 0){ capturing = true;}
+			}
+		}
+
+		return capturing;
+	}
 }
