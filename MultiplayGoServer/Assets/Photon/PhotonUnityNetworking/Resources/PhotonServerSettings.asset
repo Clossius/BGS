@@ -37,4 +37,6 @@ MonoBehaviour:
   - PlayMoveOverNetwork
   - PlayMovesOnAllClients
   - NetworkRemoveCapture
+  - NetWorkGameOver
+  - NetworkGameOver
   DisableAutoOpenWizard: 1

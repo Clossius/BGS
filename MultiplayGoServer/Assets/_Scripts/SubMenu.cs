@@ -7,7 +7,8 @@ using UnityEngine.UI;
 
 public class SubMenu : MonoBehaviour {
 
-	public GameObject title;
+	private TextMeshProUGUI title;
+	private TextMeshProUGUI info;
 	public GameObject pOneUsername;
 	public GameObject pTwoUsername;
 	public GameObject pOneTimeText;
@@ -23,10 +24,11 @@ public class SubMenu : MonoBehaviour {
 	{
 		subMenu.SetActive (true);
 
-		title = GameObject.FindGameObjectWithTag ("SubMenuTitle");
-		TextMeshProUGUI text = title.GetComponent<TextMeshProUGUI> ();
+		title = GameObject.FindGameObjectWithTag ("SubMenuTitle").GetComponent<TextMeshProUGUI>();
+		info = GameObject.FindGameObjectWithTag ("SubMenuInfo").GetComponent<TextMeshProUGUI>();
 
-		text.text = "Room: " + roomID;
+		title.text = "Capture Go";
+		info.text = "Waiting for game to start.";
 	}
 
 	// Update the player information in a room.
@@ -92,5 +94,17 @@ public class SubMenu : MonoBehaviour {
 			text.text = "Game active.";
 		}
 		subMenu.SetActive (false);
+	}
+
+	// Game Over. Display the winner and update the room settings.
+	public void GameOver (string winner)
+	{
+		subMenu.SetActive (true);
+
+		title = GameObject.FindGameObjectWithTag ("SubMenuTitle").GetComponent<TextMeshProUGUI>();
+		info = GameObject.FindGameObjectWithTag ("SubMenuInfo").GetComponent<TextMeshProUGUI>();
+
+		title.text = "Game Over!";
+		info.text = winner + " is the winner!";
 	}
 }

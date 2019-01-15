@@ -261,27 +261,58 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		{
 			Debug.Log ("Something Captured!");
 			// TODO: Check if the rule set is capture Go or not.
-			GameOver();
+
+			hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+			for (int i=0; i<playerColors.Count; i++)
+			{
+				if ((int)hash[rpk.currentTurn] != i)
+				{
+					pv.RPC ("NetworkRemoveCapture", RpcTarget.All, playerColors[i], (int)hash[rpk.boardSize]);
+				}
+			}
+				
 		}
 
+		CheckWincondition ((int)hash[rpk.ruleSet], capture);
 		ChangeTurn ();
 	}
 
-	private void GameOver ()
+	// Check for win condition.
+	private void CheckWincondition (int ruleSet, bool captured)
 	{
 		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){ return;}
 
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
-		for (int i=0; i<playerColors.Count; i++)
+		if (ruleSet == 0 && captured) // Capture Go
 		{
-			if ((int)hash[rpk.currentTurn] != i)
-			{
-				pv.RPC ("NetworkRemoveCapture", RpcTarget.All, playerColors[i], (int)hash[rpk.boardSize]);
-			}
+			string winner = players[(int)hash[rpk.currentTurn]];
+			GameOver (winner);
 		}
 	}
 
+	// Adjust the sub menu for Game Over settings.
+	private void GameOver (string winner)
+	{
+		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){ return;}
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+		hash [rpk.activeGame] = false;
+		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
+
+		pv.RPC ("NetworkGameOver", RpcTarget.All, winner);
+
+	}
+
+	[PunRPC]
+	public void NetworkGameOver (string winner)
+	{
+		GameObject gameMenu = GameObject.Find ("GameMenu");
+		gameMenu.GetComponent<SubMenu> ().GameOver (winner);
+	}
+
+	// Remove the stones of the given color with 0 liberties.
 	[PunRPC]
 	public void NetworkRemoveCapture (int color, int boardSize)
 	{
@@ -295,16 +326,19 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			Debug.Log ("Not Master client.");
 			return;
 		}
-
+			
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
-		int currentTurn = (int)hash [rpk.currentTurn];
-		currentTurn++;
+		if ((bool)hash[rpk.activeGame])
+		{
+			int currentTurn = (int)hash [rpk.currentTurn];
+			currentTurn++;
 
-		if(currentTurn >= players.Count){ currentTurn = 0;}
+			if(currentTurn >= players.Count){ currentTurn = 0;}
 
-		hash [rpk.currentTurn] = currentTurn;
-		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
+			hash [rpk.currentTurn] = currentTurn;
+			PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
+		}
 	}
 
 	// Check if anything has been captured.
