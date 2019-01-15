@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Photon.Pun;
 using Photon.Realtime;
 
@@ -91,13 +92,17 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	public override void OnJoinedLobby ()
 	{
 		Debug.Log ("Joined lobby.");
+		if (PhotonNetwork.NickName != "")
+		{
+			GameObject.Find ("MenuScreen").GetComponent<MenuButtonManager>().LoadMenuSettings();
+		}
 	}
 
 	// When you disconnect.
 	public override void OnDisconnected(DisconnectCause cause)
 	{
 		Debug.LogWarningFormat ("Disconnected.", cause);
-		//TODO: On disconnected, return to log in menu.
+		ConnectToNetwork();
 	}
 
 	// Connect to the network using the settings already applied
@@ -133,17 +138,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 			CreateRoom (new RoomOptions ());
 		} else {
 			Debug.Log ("Room Found!");
-
 			PhotonNetwork.JoinRandomRoom ();
-
-			//RoomInfo[] rooms = PhotonNetwork.GetCustomRoomList(TypedLobby.Default, "");
-
-			//Dictionary<string, RoomInfo>.KeyCollection keys = m_cachedRoomList.Keys;
-
-			//foreach (string key in keys)
-			//{
-			//	Debug.Log (m_cachedRoomList[key]);
-			//}
 
 		}
 	}
@@ -158,6 +153,10 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 
 		if (PhotonNetwork.IsMasterClient && PhotonNetwork.IsConnected) {
 			Debug.Log ("Client is master client.");
+
+			PhotonNetwork.CurrentRoom.EmptyRoomTtl = 0;
+			PhotonNetwork.CurrentRoom.PlayerTtl = 0;
+
 			PhotonNetwork.Instantiate ("RoomManager", new Vector3 (0.0f, 0.0f, 0.0f),
 				Quaternion.Euler (0.0f, 0.0f, 0.0f), 0, null);
 
@@ -186,5 +185,11 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		}
 	}
 
-
+	public void LeaveCurrentRoom ()
+	{
+		string username = PhotonNetwork.NickName;
+		PhotonNetwork.LeaveRoom (true);
+		PhotonNetwork.Disconnect ();
+		SceneManager.LoadScene ("MenuScene");
+	}
 }

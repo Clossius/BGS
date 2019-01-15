@@ -13,7 +13,6 @@ public class menuUsernameScript : MonoBehaviour {
 	{
 		TextMeshProUGUI tmp = this.GetComponent<TextMeshProUGUI> ();
 		Debug.Log (PhotonNetwork.NickName);
-		Debug.Log (tmp.text);
 		tmp.text = PhotonNetwork.NickName;
 	}
 }

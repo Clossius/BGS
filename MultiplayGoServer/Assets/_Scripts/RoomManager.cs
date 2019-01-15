@@ -130,7 +130,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			players.Add ((string)hash[rpk.playerOneName]);
 			players.Add ((string)hash[rpk.playerTwoName]);
 
-			pv.RPC ("SubMenuPlayerSettings", RpcTarget.All, (string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName], playerColors[0], playerColors[1]);
+			pv.RPC ("GameRoomSetup", RpcTarget.All, (string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName], playerColors[0], playerColors[1]);
 		}
 	}
 
@@ -154,15 +154,20 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 	}
 
-	// Call all the clients to set up the players
+	// Call all the clients to set up the room
 	// settings in the sub menu.
 	[PunRPC]
-	private void SubMenuPlayerSettings (string pOne, string pTwo, int pOneColor, int pTwoColor)
+	private void GameRoomSetup (string pOne, string pTwo, int pOneColor, int pTwoColor)
 	{
 		GameObject gameMenu = GameObject.Find ("GameMenu");
 
 		gameMenu.GetComponent<SubMenu> ().UpdatePlayers (pOne, pTwo, pOneColor, pTwoColor);
 		gameMenu.GetComponent<SubMenu> ().StartGameSetup ();
+
+		if (PhotonNetwork.NickName == pOne || PhotonNetwork.NickName == pTwo) 
+		{
+			gameMenu.GetComponent<GameButtonManager> ().GameStart ();
+		}
 	}
 
 	// Debug the properties of the room that changed.
@@ -288,12 +293,12 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		if (ruleSet == 0 && captured) // Capture Go
 		{
 			string winner = players[(int)hash[rpk.currentTurn]];
-			GameOver (winner);
+			GameOver (winner, "Capture");
 		}
 	}
 
 	// Adjust the sub menu for Game Over settings.
-	private void GameOver (string winner)
+	private void GameOver (string winner, string wonBy)
 	{
 		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){ return;}
 
@@ -301,15 +306,16 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		hash [rpk.activeGame] = false;
 		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 
-		pv.RPC ("NetworkGameOver", RpcTarget.All, winner);
+		pv.RPC ("NetworkGameOver", RpcTarget.All, winner, wonBy);
 
 	}
 
 	[PunRPC]
-	public void NetworkGameOver (string winner)
+	public void NetworkGameOver (string winner, string wonBy)
 	{
 		GameObject gameMenu = GameObject.Find ("GameMenu");
-		gameMenu.GetComponent<SubMenu> ().GameOver (winner);
+		gameMenu.GetComponent<SubMenu> ().GameOver (winner, wonBy);
+		gameMenu.GetComponent<GameButtonManager> ().ResetToDefault ();
 	}
 
 	// Remove the stones of the given color with 0 liberties.
@@ -357,5 +363,31 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		}
 
 		return capture;
+	}
+
+	// Makes the current turn player Give Up
+	public void GiveUp ()
+	{
+		pv.RPC ("PlayerGaveUp", RpcTarget.All, PhotonNetwork.NickName);
+	}
+
+	[PunRPC]
+	private void PlayerGaveUp (string username)
+	{
+		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){return;}
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		List<string> currentPlayers = players; //TODO: Get players from the Network.
+
+		for (int i=0; i<currentPlayers.Count; i++)
+		{
+			if (username == currentPlayers[i]){currentPlayers.RemoveAt (i); i = 0;}
+		}
+
+		if(currentPlayers.Count == 1)
+		{
+			GameOver (currentPlayers[0], "Resignation");
+		}
 	}
 }

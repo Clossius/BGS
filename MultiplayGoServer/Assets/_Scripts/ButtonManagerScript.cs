@@ -26,12 +26,13 @@ public class ButtonManagerScript : MonoBehaviour {
 		PhotonNetwork.NickName = "Guest#" + num.ToString();
 		Debug.Log ("Username: " + PhotonNetwork.NickName);
 		//TODO: check for duplicate username
+		// Change the scene to the menu.
+		SceneManager.LoadScene ("MenuScene");
 
 		//Connect to the network.
 		GameObject.Find ("_Network").GetComponent<NetworkManager>().JoinLobby();
 
-		// Change the scene to the menu.
-		SceneManager.LoadScene ("MenuScene");
+
 	}
 
 	// Login Button
@@ -46,11 +47,13 @@ public class ButtonManagerScript : MonoBehaviour {
 			//Make sure the error message is false.
 			errorMessage.SetActive (false);
 
+			// Change the scene to the menu.
+			SceneManager.LoadScene ("MenuScene");
+
 			//Connect to the network.
 			GameObject.Find ("_Network").GetComponent<NetworkManager>().JoinLobby();
 
-			// Change the scene to the menu.
-			SceneManager.LoadScene ("MenuScene");
+
 
 		} else {
 			errorMessage.SetActive (true);
@@ -70,9 +73,17 @@ public class ButtonManagerScript : MonoBehaviour {
 	// Leaves the game room and returns to the game menu.
 	public void LeaveRoomButton ()
 	{
-		GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ().DestroyStones ();
-		GameObject.Find ("_GobanManager").GetComponent<DrawLineScript> ().DestroyLines ();
-		GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager> ().LeaveRoom ();
+		// Leave the room the client is currently in and
+		// join the lobby.
+		// Change the scene to the menu.
+		GameObject.Find("_Network").GetComponent<NetworkManager>().LeaveCurrentRoom();
 
+	}
+
+	// Resign the game you are currently playing.
+	public void ResignButton ()
+	{
+		Debug.Log ("Resign");
+		GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager> ().GiveUp ();
 	}
 }

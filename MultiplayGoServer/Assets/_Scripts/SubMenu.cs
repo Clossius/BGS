@@ -29,6 +29,8 @@ public class SubMenu : MonoBehaviour {
 
 		title.text = "Capture Go";
 		info.text = "Waiting for game to start.";
+
+		GameObject.Find ("GameMenu").GetComponent<GameButtonManager> ().ResetToDefault ();
 	}
 
 	// Update the player information in a room.
@@ -97,7 +99,7 @@ public class SubMenu : MonoBehaviour {
 	}
 
 	// Game Over. Display the winner and update the room settings.
-	public void GameOver (string winner)
+	public void GameOver (string winner, string wonBy)
 	{
 		subMenu.SetActive (true);
 
@@ -105,6 +107,6 @@ public class SubMenu : MonoBehaviour {
 		info = GameObject.FindGameObjectWithTag ("SubMenuInfo").GetComponent<TextMeshProUGUI>();
 
 		title.text = "Game Over!";
-		info.text = winner + " is the winner!";
+		info.text = winner + " is the winner!\nWon by " + wonBy;
 	}
 }
