@@ -18,6 +18,8 @@ public class RoomPropertyKeys
 	public string playerTwoName = "ptn";
 	public string playerOneTime = "pot";
 	public string playerTwoTime = "ptt";
+	public string isVisible = "iv";
+	public string isOpen = "io";
 }
 
 public class RoomManager : MonoBehaviourPunCallbacks {
@@ -46,18 +48,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		stoneManger = GameObject.Find ("_StoneManager");
 		playerColors = new List<int> ();
 	}
-
-	public override void OnLeftRoom ()
-	{
-		Debug.Log ("Left room.");
-		GameObject.Find ("_Scripts").GetComponent<MenuManager> ().ChangeMenu (1);
-	}
-
-	public void LeaveRoom ()
-	{
-		PhotonNetwork.LeaveRoom ();
-	}
-
+		
 	// Initialize the room settings.
 	public void InitializeRoomSettings ()
 	{
@@ -89,7 +80,22 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		hash.Add (rpk.activeGame, false);
 		hash.Add (rpk.playerOneName, "");
 		hash.Add (rpk.playerTwoName, "");
+		hash.Add (rpk.isOpen, true);
+		hash.Add (rpk.isVisible, true);
 
+		string[] lobbyProperties = new string[] {
+			rpk.boardSize,
+			rpk.numPlayers,
+			rpk.ruleSet,
+			rpk.activeGame,
+			rpk.timeSet,
+			rpk.playerOneName,
+			rpk.playerTwoName,
+			rpk.isOpen,
+			rpk.isVisible
+		};
+
+		PhotonNetwork.CurrentRoom.SetPropertiesListedInLobby (lobbyProperties);
 
 		string username = PhotonNetwork.NickName;
 		hash [rpk.playerOneName] = username;
@@ -168,13 +174,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		{
 			gameMenu.GetComponent<GameButtonManager> ().GameStart ();
 		}
-	}
-
-	// Debug the properties of the room that changed.
-	public override void OnRoomPropertiesUpdate (ExitGames.Client.Photon.Hashtable propertiesThatChanged)
-	{
-		base.OnRoomPropertiesUpdate (propertiesThatChanged);
-		//Debug.Log (propertiesThatChanged);
 	}
 
 	// Get if the current player can play a move
@@ -325,6 +324,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		stoneManger.GetComponent<StoneManagerScript> ().RemoveCaptureColor (color, boardSize);
 	}
 
+	// Change the current turn in the room if the game is active.
 	private void ChangeTurn ()
 	{
 		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected) 
@@ -389,5 +389,15 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		{
 			GameOver (currentPlayers[0], "Resignation");
 		}
+	}
+
+	public void LeavingRoom ()
+	{
+		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){return;}
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+		hash[rpk.isOpen] = false;
+		hash[rpk.isVisible] = false;
+		PhotonNetwork.CurrentRoom.SetCustomProperties(hash, null, null);
 	}
 }

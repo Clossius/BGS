@@ -66,7 +66,7 @@ public class ButtonManagerScript : MonoBehaviour {
 	{
 		SceneManager.LoadScene ("Game");
 
-		GameObject.Find ("_Network").GetComponent<NetworkManager> ().JoinRandomRoom();
+		GameObject.Find ("_Network").GetComponent<NetworkManager> ().JoinCustomRandomRoom();
 
 	}
 

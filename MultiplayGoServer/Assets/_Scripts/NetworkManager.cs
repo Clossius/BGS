@@ -5,6 +5,18 @@ using UnityEngine.SceneManagement;
 using Photon.Pun;
 using Photon.Realtime;
 
+public class Room 
+{
+	public RoomInfo roomInfo;
+	public ExitGames.Client.Photon.Hashtable hash;
+
+	public Room (RoomInfo ri, ExitGames.Client.Photon.Hashtable h)
+	{
+		roomInfo = ri;
+		hash = h;
+	}
+}
+
 public class NetworkManager: MonoBehaviourPunCallbacks {
 
 	/// <summary>
@@ -17,7 +29,15 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 
 	private string gameVersion = "0.0.1"; 
 	public byte maxPlayers = 4;
+	List<Room> localRooms;
+	RoomPropertyKeys rpk;
+
 	PhotonView pv;
+
+
+	// ********************************
+	// Initizlization
+	// ********************************
 
 	private void awake ()
 	{
@@ -30,40 +50,27 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 
 	private void Start ()
 	{
-		//PhotonNetwork.AddCallbackTarget (this);
 		pv = PhotonView.Get(this);
+
+		rpk = new RoomPropertyKeys();
 		ConnectToNetwork ();
+
 		PhotonNetwork.Instantiate ("PlayerData", new Vector3 (0.0f, 0.0f, 0.0f),
 			Quaternion.Euler(0.0f, 0.0f, 0.0f), 0, null);
 	}
 
+	// ********************************
+	// Connections
+	// ********************************
 
-
-	/*private void UpdateCachedRoomList (List<RoomInfo> roomList)
+	// Connect to the network using the settings already applied
+	// to the photon objects.
+	// Set the game version to use when connecting.
+	public void ConnectToNetwork ()
 	{
-		foreach (RoomInfo info in roomList)
-		{
-			if (!info.IsOpen || !info.IsVisible || info.RemovedFromList)
-			{
-				if (m_cachedRoomList.ContainsKey(info.Name))
-				{
-					m_cachedRoomList.Remove (info.Name);
-				}
-			}
-
-			if (m_cachedRoomList.ContainsKey (info.Name)) {
-				m_cachedRoomList [info.Name] = info;
-			} else {
-				m_cachedRoomList.Add (info.Name, info);
-			}
-		}
+		PhotonNetwork.GameVersion = gameVersion;
+		PhotonNetwork.ConnectUsingSettings ();
 	}
-
-	public override void OnRoomListUpdate (List<RoomInfo> roomList)
-	{
-		base.OnRoomListUpdate (roomList);
-		UpdateCachedRoomList (roomList);
-	}*/
 
 	// When you connect to the master server.
 	public override void OnConnectedToMaster ()
@@ -80,6 +87,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		}
 	}
 
+	// Join the lobby of the server.
 	public void JoinLobby ()
 	{
 		if (PhotonNetwork.IsConnected)
@@ -102,22 +110,22 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	public override void OnDisconnected(DisconnectCause cause)
 	{
 		Debug.LogWarningFormat ("Disconnected.", cause);
-		ConnectToNetwork();
 	}
 
-	// Connect to the network using the settings already applied
-	// to the photon objects.
-	// Set the game version to use when connecting.
-	public void ConnectToNetwork ()
-	{
-		PhotonNetwork.GameVersion = gameVersion;
-		PhotonNetwork.ConnectUsingSettings ();
-	}
+	// ********************************
+	// Room Creating and Joining
+	// ********************************
 
 	// Create a room.
 	public void CreateRoom (RoomOptions ro)
 	{
-		PhotonNetwork.CreateRoom ("Room_" + System.Guid.NewGuid().ToString(), ro);
+		PhotonNetwork.CreateRoom ("Room_" + PhotonNetwork.NickName, ro);
+	}
+
+	// Join a room with a given name.
+	public void JoinRoom (string roomName)
+	{
+		PhotonNetwork.JoinRoom (roomName, null);
 	}
 
 
@@ -129,19 +137,78 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	}
 
 	// Join random room or create one.
-	public void JoinRandomRoom ()
+	public void JoinCustomRandomRoom ()
 	{
-		int roomCount = PhotonNetwork.CountOfRooms;
-		Debug.Log ("Rooms found: " + roomCount);
+		Debug.Log ("Rooms found: " + localRooms.Count + "/" + localRooms.Count);
+		RoomOptions ro = new RoomOptions ();
 
-		if (roomCount == 0) {
-			CreateRoom (new RoomOptions ());
+		if (localRooms.Count == 0) {
+			CreateRoom (ro);
 		} else {
-			Debug.Log ("Room Found!");
-			PhotonNetwork.JoinRandomRoom ();
+			Debug.Log ("Rooms Found!");
+			List<Room> roomsOpen = new List<Room> ();
+
+			for (int i = 0; i < localRooms.Count; i++) {
+				ExitGames.Client.Photon.Hashtable hash = localRooms [i].roomInfo.CustomProperties;
+				if(!(bool)hash[rpk.activeGame])
+				{
+					if ((string)hash [rpk.playerOneName] == "" || (string)hash [rpk.playerTwoName] == "") {
+						roomsOpen.Add (localRooms[i]);
+					}
+				}
+			}
+
+			if (roomsOpen.Count == 0) {
+				CreateRoom (ro);
+			} else {
+				JoinRoom (roomsOpen[0].roomInfo.Name);
+			}
+		}
+	}
+
+	public override void OnRoomListUpdate (List<RoomInfo> roomList)
+	{
+		base.OnRoomListUpdate (roomList);
+
+		localRooms = new List<Room> ();
+
+		for (int i=0; i<roomList.Count; i++)
+		{
+			bool removed = roomList [i].RemovedFromList;
+			if (roomList[i].IsVisible && !removed)
+			{
+				ExitGames.Client.Photon.Hashtable hash = roomList [i].CustomProperties;
+				if(hash == null){Debug.Log ("NULL ERROR");}
+				if ((bool)hash[rpk.isVisible])
+				{
+					Room newRoom = new Room (roomList[i], roomList[i].CustomProperties);
+					localRooms.Add (newRoom);
+				}
+			}
+		}
+
+		Debug.Log ("Room added. New room count: " + localRooms.Count);
+		if (localRooms.Count > 0)
+		{
+			Debug.Log ("Is Visible: " + localRooms[0].roomInfo.IsVisible.ToString());
+			Debug.Log ("Num Players: " + localRooms[0].hash[rpk.numPlayers].ToString());
+			Debug.Log ("Room Name: " + (string)localRooms[0].roomInfo.Name);
+			Debug.Log ("Active Game: " + localRooms[0].hash[rpk.activeGame].ToString());
 
 		}
 	}
+
+	// When a client fails to join a room this function is called.
+	public override void OnJoinRoomFailed (short returnCode, string message)
+	{
+		base.OnJoinRoomFailed (returnCode, message);
+		Debug.Log ("Failed to join a room. " + message);
+		JoinCustomRandomRoom ();
+	}
+
+	// ********************************
+	// Room Call Backs
+	// ********************************
 
 	// Client joined a room.
 	// If client is the master client, load the room settings.
@@ -153,9 +220,6 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 
 		if (PhotonNetwork.IsMasterClient && PhotonNetwork.IsConnected) {
 			Debug.Log ("Client is master client.");
-
-			PhotonNetwork.CurrentRoom.EmptyRoomTtl = 0;
-			PhotonNetwork.CurrentRoom.PlayerTtl = 0;
 
 			PhotonNetwork.Instantiate ("RoomManager", new Vector3 (0.0f, 0.0f, 0.0f),
 				Quaternion.Euler (0.0f, 0.0f, 0.0f), 0, null);
@@ -185,11 +249,41 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		}
 	}
 
+	// Leave the current room the client is in and call OnLeftRoom.
 	public void LeaveCurrentRoom ()
 	{
-		string username = PhotonNetwork.NickName;
-		PhotonNetwork.LeaveRoom (true);
-		PhotonNetwork.Disconnect ();
+		if(PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient)
+		{
+			Debug.Log ("Making room false.");
+			Debug.Log (PhotonNetwork.CurrentRoom.IsVisible);
+			GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager>().LeavingRoom();
+			if(PhotonNetwork.PlayerListOthers.Length > 0)
+			{
+				PhotonNetwork.CurrentRoom.SetMasterClient((Player)PhotonNetwork.PlayerListOthers[0]);
+				Debug.Log ("Changed Master Client to " + PhotonNetwork.PlayerListOthers[0].NickName);
+				pv.RPC ("CreateRoomManager", RpcTarget.All);
+			}
+		}
+
+		PhotonNetwork.LeaveRoom ();
+
+	}
+
+	// Gets called when the client leaves a room.
+	// Join the lobby.
+	public override void OnLeftRoom ()
+	{
+		base.OnLeftRoom ();
+		Debug.Log("Left Room");
 		SceneManager.LoadScene ("MenuScene");
+		JoinLobby ();
+	}
+
+	[PunRPC]
+	private void CreateRoomManager ()
+	{
+		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){return;}
+		PhotonNetwork.Instantiate ("RoomManager", new Vector3 (0.0f, 0.0f, 0.0f),
+			Quaternion.Euler (0.0f, 0.0f, 0.0f), 0, null);
 	}
 }
