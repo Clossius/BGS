@@ -261,7 +261,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 			{
 				PhotonNetwork.CurrentRoom.SetMasterClient((Player)PhotonNetwork.PlayerListOthers[0]);
 				Debug.Log ("Changed Master Client to " + PhotonNetwork.PlayerListOthers[0].NickName);
-				pv.RPC ("CreateRoomManager", RpcTarget.All);
+
 			}
 		}
 
@@ -283,7 +283,17 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	private void CreateRoomManager ()
 	{
 		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){return;}
+
 		PhotonNetwork.Instantiate ("RoomManager", new Vector3 (0.0f, 0.0f, 0.0f),
 			Quaternion.Euler (0.0f, 0.0f, 0.0f), 0, null);
+
+		GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager> ().CallMasterClientSwitched ();
+	}
+
+	public override void OnMasterClientSwitched (Player newMasterClient)
+	{
+		base.OnMasterClientSwitched (newMasterClient);
+
+		pv.RPC ("CreateRoomManager", RpcTarget.All);
 	}
 }

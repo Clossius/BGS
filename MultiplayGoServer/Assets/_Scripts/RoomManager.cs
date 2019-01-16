@@ -126,6 +126,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			if(PhotonNetwork.NickName == username){Debug.Log ("ERROR: Duplicate Usernames");}
 
 			hash [rpk.activeGame] = true;
+			hash [rpk.isVisible] = false;
 
 			PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 
@@ -399,5 +400,24 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		hash[rpk.isOpen] = false;
 		hash[rpk.isVisible] = false;
 		PhotonNetwork.CurrentRoom.SetCustomProperties(hash, null, null);
+	}
+
+	public void CallMasterClientSwitched ()
+	{
+		pv.RPC ("MasterClientChanged", RpcTarget.All);
+	}
+
+	// Gets called when the master client switches.
+	[PunRPC]
+	public void MasterClientChanged ()
+	{
+		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){return;}
+		// Check to see if the players are still connected.
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+		if((bool)hash[rpk.activeGame])
+		{
+			//TODO: Fix this when the players are kept track of over the network.
+			GameOver(PhotonNetwork.NickName, "Resignation");
+		}
 	}
 }

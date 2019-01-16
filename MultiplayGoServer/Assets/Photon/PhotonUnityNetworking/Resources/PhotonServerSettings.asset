@@ -42,4 +42,5 @@ MonoBehaviour:
   - GameRoomSetup
   - PlayerGaveUp
   - CreateRoomManager
+  - MasterClientChanged
   DisableAutoOpenWizard: 1
