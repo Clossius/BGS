@@ -14,6 +14,12 @@ public class ButtonManagerScript : MonoBehaviour {
 	//**********************************************************************
 
 	public GameObject errorMessage;
+	public GameObject SoundManager;
+
+	private void PlayButtonClickSound ()
+	{
+		SoundManager.GetComponent<SoundManagerScript> ().PlayClickSound ();
+	}
 
 	// Guest Button.
 	// Logs the user in as a guest.
@@ -32,14 +38,14 @@ public class ButtonManagerScript : MonoBehaviour {
 		//Connect to the network.
 		GameObject.Find ("_Network").GetComponent<NetworkManager>().JoinLobby();
 
-
+		PlayButtonClickSound ();
 	}
 
 	// Login Button
 	public void LoginButton (GameObject go)
 	{
 		TextMeshProUGUI text = go.GetComponent<TextMeshProUGUI> ();
-
+		PlayButtonClickSound ();
 		if (text.text.Length > 4 && text.text.Length < 10) {
 			//Set the username
 			PhotonNetwork.NickName = text.text;
@@ -64,10 +70,10 @@ public class ButtonManagerScript : MonoBehaviour {
 	// Sets up room with given conditions.
 	public void PlayButton ()
 	{
+		PlayButtonClickSound ();
 		SceneManager.LoadScene ("Game");
 
 		GameObject.Find ("_Network").GetComponent<NetworkManager> ().JoinCustomRandomRoom();
-
 	}
 
 	// Leaves the game room and returns to the game menu.
@@ -76,14 +82,16 @@ public class ButtonManagerScript : MonoBehaviour {
 		// Leave the room the client is currently in and
 		// join the lobby.
 		// Change the scene to the menu.
+		PlayButtonClickSound ();
 		GameObject.Find("_Network").GetComponent<NetworkManager>().LeaveCurrentRoom();
-
 	}
 
 	// Resign the game you are currently playing.
 	public void ResignButton ()
 	{
 		Debug.Log ("Resign");
+		PlayButtonClickSound ();
 		GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager> ().GiveUp ();
 	}
+		
 }

@@ -100,6 +100,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	public override void OnJoinedLobby ()
 	{
 		Debug.Log ("Joined lobby.");
+		GameObject.Find ("SoundManager").GetComponent<SoundManagerScript> ().PlayBackgroundOne ();
 		if (PhotonNetwork.NickName != "")
 		{
 			GameObject.Find ("MenuScreen").GetComponent<MenuButtonManager>().LoadMenuSettings();
@@ -120,6 +121,20 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	public void CreateRoom (RoomOptions ro)
 	{
 		PhotonNetwork.CreateRoom ("Room_" + PhotonNetwork.NickName, ro);
+	}
+
+	public override void OnCreateRoomFailed (short returnCode, string message)
+	{
+		base.OnCreateRoomFailed (returnCode, message);
+		Debug.Log ("Failed to create room. Creating unique name room.");
+
+		string roomName = "Room_" + PhotonNetwork.NickName;
+		int num = Random.Range (1000, 10000);
+		roomName = roomName + num.ToString ();
+
+		RoomOptions ro = new RoomOptions ();
+
+		PhotonNetwork.CreateRoom (roomName, ro);
 	}
 
 	// Join a room with a given name.
@@ -143,6 +158,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		RoomOptions ro = new RoomOptions ();
 
 		if (localRooms.Count == 0) {
+			Debug.Log ("No Rooms found, creating room.");
 			CreateRoom (ro);
 		} else {
 			Debug.Log ("Rooms Found!");
@@ -159,8 +175,10 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 			}
 
 			if (roomsOpen.Count == 0) {
+				Debug.Log ("Creating Room after rooms found.");
 				CreateRoom (ro);
 			} else {
+				Debug.Log ("Joining Room " + roomsOpen[0].roomInfo.Name);
 				JoinRoom (roomsOpen[0].roomInfo.Name);
 			}
 		}
@@ -257,12 +275,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 			Debug.Log ("Making room false.");
 			Debug.Log (PhotonNetwork.CurrentRoom.IsVisible);
 			GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager>().LeavingRoom();
-			if(PhotonNetwork.PlayerListOthers.Length > 0)
-			{
-				PhotonNetwork.CurrentRoom.SetMasterClient((Player)PhotonNetwork.PlayerListOthers[0]);
-				Debug.Log ("Changed Master Client to " + PhotonNetwork.PlayerListOthers[0].NickName);
 
-			}
 		}
 
 		PhotonNetwork.LeaveRoom ();

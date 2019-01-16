@@ -3956,7 +3956,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1225995325}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1225995327
 Camera:
   m_ObjectHideFlags: 0
@@ -5798,7 +5798,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 46.2
+  m_fontSize: 44.2
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1

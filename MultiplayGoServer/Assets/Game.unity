@@ -540,7 +540,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 161698151}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!124 &161698153
 Behaviour:
   m_ObjectHideFlags: 0
@@ -1700,7 +1700,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 17.55
+  m_fontSize: 16.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4549,7 +4549,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 17.55
+  m_fontSize: 16.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
