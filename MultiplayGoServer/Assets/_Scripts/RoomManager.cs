@@ -313,6 +313,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	[PunRPC]
 	public void NetworkGameOver (string winner, string wonBy)
 	{
+		GameObject.Find ("SoundManager").GetComponent<SoundManagerScript>().PlayWinningSound();
 		GameObject gameMenu = GameObject.Find ("GameMenu");
 		gameMenu.GetComponent<SubMenu> ().GameOver (winner, wonBy);
 		gameMenu.GetComponent<GameButtonManager> ().ResetToDefault ();

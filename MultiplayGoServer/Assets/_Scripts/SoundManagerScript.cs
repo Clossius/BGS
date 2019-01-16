@@ -18,40 +18,72 @@ public class SoundManagerScript : MonoBehaviour
 	[Header("SFX")]
 	public AudioClip buttonClickSound;
 	public AudioClip stonePlacementSound;
+	public AudioClip winningSound;
+
+	[Header("Settings")]
+	public bool globalSoundActive = true;
 
 	void Start ()
 	{
 		background = this.GetComponent<AudioSource> ();
 	}
 
+	public void SetGlobalSound (bool condition)
+	{
+		globalSoundActive = condition;
+		background = this.GetComponent<AudioSource> ();
+		if (condition) {
+			background.Play ();
+			background.loop = true;
+		} else {
+			background.Stop ();
+		}
+	}
+
+	private void PlaySFXSound (AudioClip clip)
+	{
+		if(globalSoundActive)
+		{
+			sfx.PlayOneShot (clip);
+		}
+	}
+
+	private void PlayBackgroundMusic (AudioClip clip)
+	{
+		if (background.clip == clip){return;}
+		else if(globalSoundActive)
+		{
+			background.Stop ();
+			background.clip = clip;
+			background.Play ();
+			background.loop = true;
+		}
+
+	}
+
 	public void PlayClickSound ()
 	{
-		sfx.PlayOneShot(buttonClickSound);
+		PlaySFXSound(buttonClickSound);
 	}
 
 	public void PlayStoneSound ()
 	{
-		sfx.PlayOneShot (stonePlacementSound);
+		PlaySFXSound(stonePlacementSound);
 	}
 
 	public void PlayBackgroundOne ()
 	{
-		if(background.clip == backgroundMusic1){return;}
-
-		background.Stop ();
-		background.clip = backgroundMusic1;
-		background.Play ();
-		background.loop = true;
+		PlayBackgroundMusic (backgroundMusic1);
 	}
 
 
 	public void PlayBackgroundTwo ()
 	{
-		if(background.clip == backgroundMusic2){return;}
+		PlayBackgroundMusic (backgroundMusic2);
+	}
 
-		background.Stop ();
-		background.clip = backgroundMusic2;
-		background.Play ();
-		background.loop = true;
+	public void PlayWinningSound ()
+	{
+		PlaySFXSound (winningSound);
 	}
 }
