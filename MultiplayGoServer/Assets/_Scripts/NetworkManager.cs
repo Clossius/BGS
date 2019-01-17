@@ -27,7 +27,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 
 	private Dictionary<string, RoomInfo> m_cachedRoomList;
 
-	private string gameVersion = "0.0.1"; 
+	private string gameVersion = "0.0.2"; 
 	public byte maxPlayers = 4;
 	List<Room> localRooms;
 	RoomPropertyKeys rpk;
