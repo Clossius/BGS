@@ -104,7 +104,10 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		if (PhotonNetwork.NickName != "")
 		{
 			GameObject.Find ("MenuScreen").GetComponent<MenuButtonManager>().LoadMenuSettings();
+			GameObject.Find ("MenuScreen").GetComponent<TopBarSettings> ().
+			SetOnlineUsersText (PhotonNetwork.CountOfPlayers);
 		}
+			
 	}
 
 	// When you disconnect.
@@ -308,5 +311,20 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		base.OnMasterClientSwitched (newMasterClient);
 
 		pv.RPC ("CreateRoomManager", RpcTarget.All);
+	}
+
+	public void UpdatePlayersOnline ()
+	{
+		int numClients = PhotonNetwork.CountOfPlayers;
+
+		GameObject.Find ("MenuScreen").GetComponent<TopBarSettings> ().SetOnlineUsersText (numClients);
+	}
+
+	public override void OnLobbyStatisticsUpdate (List<TypedLobbyInfo> lobbyStatistics)
+	{
+		base.OnLobbyStatisticsUpdate (lobbyStatistics);
+
+		GameObject.Find ("MenuScreen").GetComponent<TopBarSettings> ().
+		SetOnlineUsersText (PhotonNetwork.CountOfPlayers);
 	}
 }

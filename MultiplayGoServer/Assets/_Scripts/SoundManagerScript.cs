@@ -30,6 +30,7 @@ public class SoundManagerScript : MonoBehaviour
 
 	public void SetGlobalSound (bool condition)
 	{
+		if(globalSoundActive == condition){return;}
 		globalSoundActive = condition;
 		background = this.GetComponent<AudioSource> ();
 		if (condition) {
@@ -50,8 +51,7 @@ public class SoundManagerScript : MonoBehaviour
 
 	private void PlayBackgroundMusic (AudioClip clip)
 	{
-		if (background.clip == clip){return;}
-		else if(globalSoundActive)
+		if(globalSoundActive && background.clip != clip)
 		{
 			background.Stop ();
 			background.clip = clip;
