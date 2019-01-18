@@ -1,5 +1,7 @@
 # BGS
 
+Download the game here: https://clossius.itch.io/bgs
+
 The Beginner Go Server is a project that I've been working on as a hobby. But it wasn't until 2019 that I actually said, I'm getting something out!! So I sat down and produced Capture Go! v0.1 of BGS. The original intent of this server was to make more Go variants possible to play online. For example, One Color Go, Capture Go, Blind Go, and much more. However, I started playing with the idea of how I would do the rating systems, especially for Territory Go, and I thought I could make this server beginner friendly as well as have a bunch of mini-games on it. Thus! We have come up with the Beginner Go Server. A place to play online for Beginners and others who want to try out new ways of playing Go. 
 
 While I do plan on adding in a rating system for territory Go, the primary focus of the server will be to let players have fun and to help beginners who might stop by.
