@@ -36,7 +36,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	RoomPropertyKeys rpk;
 	PhotonView pv;
 	GameObject stoneManger;
-	List<int> playerColors;
+	public List<int> playerColors;
 	List<string> players;
 
 	// Initialization

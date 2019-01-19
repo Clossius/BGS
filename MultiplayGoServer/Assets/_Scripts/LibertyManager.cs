@@ -233,6 +233,36 @@ public class LibertyManager : MonoBehaviour {
 		return liberties;
 	}
 
+	// Get the liberties of the move provided.
+	// Make a list<string> of moves with the coordinates
+	// of the liberties.
+	public List<string> GetLibertyCoordinates (string move, List<Stone> stones, int boardSize)
+	{
+		List<string> libertyCoordinates = new List<string> ();
+
+		List<string> movesToCheck = GetStringOfMoves (move, stones, boardSize);
+
+		int loop = 0; // Infinite loop counter
+		for (int i=0; i<movesToCheck.Count; i++)
+		{
+			List<string> touchingCoords = GetTouchingCoordinates (movesToCheck [i], boardSize);
+
+			for (int g=0; g<touchingCoords.Count; g++)
+			{
+				bool exist = CheckMoveExist (touchingCoords [g], stones);
+				if(!exist){libertyCoordinates.Add (touchingCoords[g]);}
+			}
+
+			if (loop > 1000){Debug.Log ("ERROR: Infinite Loop."); break;}
+		}
+
+		libertyCoordinates = RemoveDuplicates (libertyCoordinates);
+
+		if(libertyCoordinates.Count == 0){Debug.Log ("ERROR: No liberties found.");}
+
+		return libertyCoordinates;
+	}
+
 	// Check for duplicate coordinates in the list<string> provided.
 	// When a duplicate is found, the move is removed from the list.
 	private List<string> RemoveDuplicates (List<string> moves)

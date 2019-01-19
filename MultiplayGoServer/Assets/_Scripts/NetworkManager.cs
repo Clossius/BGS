@@ -25,9 +25,9 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	/// Private so users cannot change the version.
 	/// </summary>
 
-	private Dictionary<string, RoomInfo> m_cachedRoomList;
+	//private Dictionary<string, RoomInfo> m_cachedRoomList;
 
-	private string gameVersion = "0.0.1"; 
+	private string gameVersion = "Testing_0.1.5"; 
 	public byte maxPlayers = 4;
 	List<Room> localRooms;
 	RoomPropertyKeys rpk;
@@ -45,7 +45,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		// master client and all clients in the same room sync their
 		// level automatically.
 		PhotonNetwork.AutomaticallySyncScene = true;
-		m_cachedRoomList = new Dictionary<string, RoomInfo> ();
+		//m_cachedRoomList = new Dictionary<string, RoomInfo> ();
 	}
 
 	private void Start ()

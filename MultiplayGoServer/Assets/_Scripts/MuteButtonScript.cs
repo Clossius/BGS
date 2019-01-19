@@ -14,7 +14,6 @@ public class MuteButtonScript : MonoBehaviour
 	private GameObject soundManager;
 
 	private string globalSoundKey = "gsk";
-	private int globalSoundStatus = 0; // 0 is on and 1 is off.
 
     // Start is called before the first frame update
     void Start()
@@ -29,9 +28,8 @@ public class MuteButtonScript : MonoBehaviour
 	{
 		bool hasKey = PlayerPrefs.HasKey (globalSoundKey);
 
-		if (hasKey) {
-			globalSoundStatus = PlayerPrefs.GetInt (globalSoundKey);
-		} else {
+		if (!hasKey) 
+		{
 			PlayerPrefs.SetInt (globalSoundKey, 0);
 		}
 	}

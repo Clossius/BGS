@@ -90,6 +90,24 @@ public class StoneManagerScript : MonoBehaviour {
 		return stones;
 	}
 
+	// Get a specific Stone at the given coordinate
+	public Stone GetStone (string coordinate)
+	{
+		Stone stone = new Stone(null, "", -1);
+
+		for (int i=0; i<stones.Count; i++)
+		{
+			if(stones[i].coordinate == coordinate){stone = stones [i];}
+		}
+
+		if (stone.coordinate == "")
+		{
+			Debug.Log ("ERROR: No stone found at the given coordinate.");
+		}
+
+		return stone;
+	}
+
 	// Get the string coordinate positions of all the stones.
 	public List<string> GetStringCoordinates ()
 	{

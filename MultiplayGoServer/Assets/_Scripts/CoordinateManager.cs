@@ -35,6 +35,20 @@ public class CoordinateManager : MonoBehaviour {
 		points.Clear ();
 	}
 
+	public List<string> GetAllCoordinates ()
+	{
+		List<string> coordinates = new List<string> ();
+
+		if (points.Count == 0){Debug.Log ("ERROR: GetAllCoordinates called before points could be initialized.");}
+
+		for (int i=0; i<points.Count; i++)
+		{
+			coordinates.Add (points[i].coordinate);
+		}
+
+		return coordinates;
+	}
+
 	// Determine coordinate positions.
 	// Creates the list of coordinate points.
 	// Requires the distance between points and the board size.
