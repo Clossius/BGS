@@ -26,8 +26,6 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	/// </summary>
 
 	//private Dictionary<string, RoomInfo> m_cachedRoomList;
-
-	private string gameVersion = "Testing_0.1.5"; 
 	public byte maxPlayers = 4;
 	List<Room> localRooms;
 	RoomPropertyKeys rpk;
@@ -68,7 +66,6 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	// Set the game version to use when connecting.
 	public void ConnectToNetwork ()
 	{
-		PhotonNetwork.GameVersion = gameVersion;
 		PhotonNetwork.ConnectUsingSettings ();
 		//PhotonNetwork.ConnectToRegion ("us");
 		//LoadBalancingClient.ConnectToRegionMaster ("usw");
@@ -79,6 +76,8 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	{
 		Debug.Log ("Connected to Master.");
 		Debug.Log ("Region: " + PhotonNetwork.CloudRegion.ToString());
+		Debug.Log ("Version: " + PhotonNetwork.AppVersion);
+		GameObject.Find ("VersionText").GetComponent<VersionText> ().SetVersion ();
 		JoinLobby();
 
 		// If in the Login Scene. Find the scene manager object and call the connected funtion
