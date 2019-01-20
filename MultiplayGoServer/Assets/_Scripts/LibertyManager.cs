@@ -94,7 +94,6 @@ public class LibertyManager : MonoBehaviour {
 	private List<string> GetTouchingCoordinates (string move, int boardSize)
 	{
 		// Get the int coordinates of x and z
-		// Within 0 and (boardSize-1)
 		int x = gobanManager.GetComponent<CoordinateManager> ().GetXInt (move, boardSize);
 		int z = gobanManager.GetComponent<CoordinateManager> ().GetZInt (move, boardSize);
 
@@ -103,37 +102,45 @@ public class LibertyManager : MonoBehaviour {
 		// Check above
 		if(z+1 <= boardSize)
 		{
-			string newCoord = gobanManager.GetComponent<CoordinateManager> ().GetLetter (x);
-			newCoord = newCoord + (z+1).ToString ();
+			string newCoord = gobanManager.GetComponent<CoordinateManager> ().GetCoordinate (x, (z+1), boardSize);
 
-			touchingCoordinate.Add (newCoord);
+			if (newCoord != "")
+			{
+				touchingCoordinate.Add (newCoord);
+			}
 		}
 
 		// Check below
 		if(z-1 > 0)
 		{
-			string newCoord = gobanManager.GetComponent<CoordinateManager> ().GetLetter (x);
-			newCoord = newCoord + (z-1).ToString ();
+			string newCoord = gobanManager.GetComponent<CoordinateManager> ().GetCoordinate (x, (z-1), boardSize);
 
-			touchingCoordinate.Add (newCoord);
+			if (newCoord != "")
+			{
+				touchingCoordinate.Add (newCoord);
+			}
 		}
 
 		// Check left
 		if(x-1 >= 0)
 		{
-			string newCoord = gobanManager.GetComponent<CoordinateManager> ().GetLetter (x-1);
-			newCoord = newCoord + (z).ToString ();
+			string newCoord = gobanManager.GetComponent<CoordinateManager> ().GetCoordinate ((x-1), z, boardSize);
 
-			touchingCoordinate.Add (newCoord);
+			if (newCoord != "")
+			{
+				touchingCoordinate.Add (newCoord);
+			}
 		}
 
 		// Check right
 		if(x+1 != boardSize)
 		{
-			string newCoord = gobanManager.GetComponent<CoordinateManager> ().GetLetter (x+1);
-			newCoord = newCoord + (z).ToString ();
+			string newCoord = gobanManager.GetComponent<CoordinateManager> ().GetCoordinate ((x+1), z, boardSize);
 
-			touchingCoordinate.Add (newCoord);
+			if (newCoord != "")
+			{
+				touchingCoordinate.Add (newCoord);
+			}
 		}
 			
 		return touchingCoordinate;

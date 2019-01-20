@@ -534,7 +534,7 @@ public class AIScript : MonoBehaviour {
 	int WeightX ( string move, int boardSize )
     {
 		int x = GameObject.Find ("_GobanManager").GetComponent<CoordinateManager> ().GetXInt (move, boardSize);
-		int weight = GetWeight (x, boardSize);
+		int weight = GetWeight ((x+1), boardSize);
 
 
 		return weight;

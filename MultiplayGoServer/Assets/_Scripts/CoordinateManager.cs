@@ -192,15 +192,15 @@ public class CoordinateManager : MonoBehaviour {
 
 		for (int i=0; i<(letters.Count*2); i++)
 		{
-			for (int g=0; g<boardSize;g++)
+			for (int g=1; g<=boardSize;g++)
 			{
 				if (i < letters.Count) {
-					string coor = letters [i] + (g+1).ToString ();
+					string coor = letters [i] + (g).ToString ();
 					if (coor == coordinate) {
 						index = i;
 					}
 				} else {
-					string coor = letters [i-letters.Count] + letters[i-letters.Count] + (g+1).ToString ();
+					string coor = letters [i-letters.Count] + letters[i-letters.Count] + (g).ToString ();
 					if (coor == coordinate) {
 						index = i;
 					}
@@ -222,7 +222,7 @@ public class CoordinateManager : MonoBehaviour {
 
 		for (int i=0; i<(letters.Count*2); i++)
 		{
-			for (int g=0; g<boardSize;g++)
+			for (int g=1; g<=boardSize;g++)
 			{
 				if (i < letters.Count) {
 					string coor = letters [i] + (g).ToString ();
@@ -242,5 +242,52 @@ public class CoordinateManager : MonoBehaviour {
 		if (index == -1){Debug.Log ("ERROR: -1 Could not find coordinate.");}
 
 		return index;
+	}
+		
+	/// <summary>
+	/// Convert the given int x and int z to
+	/// a coordinate. Returns "" if coordinate does
+	/// not exist.
+	/// </summary>
+	/// <returns>Returns a Coordinate.
+	/// Returns "" if coordinate does
+	/// not exist.</returns>
+	/// <param name="x">The x coordinate.</param>
+	/// <param name="z">The z coordinate.</param>
+	/// <param name="boardSize">Board size.</param>
+	public string GetCoordinate (int x, int z, int boardSize)
+	{
+		string move = "";
+		string letter = "";
+		if (x > -1 && x < boardSize){letter = GetLetter (x);}
+
+		if(z > 0 && z <= boardSize && letter != "")
+		{
+			move = letter + z.ToString ();
+		}
+
+		bool moveExist = CoordinateExist (move);
+
+		if(!moveExist){move = "";}
+
+		return move;
+	}
+
+	/// <summary>
+	/// Check if the given move exist as a point
+	/// on the board.
+	/// </summary>
+	/// <returns><c>true</c>, if move exist, <c>false</c> otherwise.</returns>
+	/// <param name="move">Move.</param>
+	public bool CoordinateExist (string move)
+	{
+		bool exist = false;
+
+		for (int i=0; i<points.Count; i++)
+		{
+			if(points[i].coordinate == move){exist = true;}
+		}
+
+		return exist;
 	}
 }

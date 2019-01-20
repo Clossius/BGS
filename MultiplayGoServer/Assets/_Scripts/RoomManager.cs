@@ -290,6 +290,21 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		bool capture = CheckForCaptures (stones, (int)hash[rpk.boardSize]);
 
+		/* This is for Debuging Liberties.
+		 * 
+		for (int i=0; i<stones.Count; i++)
+		{
+			List<string> liberties = GameObject.Find ("_StoneManager").GetComponent<LibertyManager> ()
+				.GetLibertyCoordinates (stones[i].coordinate, stones, (int)hash[rpk.boardSize]);
+
+			string log = stones [i].coordinate + ": " + liberties.Count.ToString();
+			for (int g=0; g<liberties.Count; g++)
+			{
+				log = log + " " + liberties [g];
+			}
+			Debug.Log (log);
+		}*/
+
 		// Check for win condition.
 		if (capture)
 		{

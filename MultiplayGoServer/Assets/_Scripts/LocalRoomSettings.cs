@@ -35,7 +35,7 @@ public class LocalRoomSettings : MonoBehaviour
 		localSettings.maxPlayers = 2;
 		localSettings.roomVisible = true;
 		localSettings.roomJoinable = true;
-		localSettings.botLevel = 0;
+		localSettings.botLevel = 1;
 	}
 
 	public LocalSettings GetLocalRoomSettings ()
