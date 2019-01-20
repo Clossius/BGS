@@ -40,6 +40,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	public List<int> playerColors;
 	List<string> players;
 	List<string> botNames;
+	bool botThinking = false;
 
 	// Initialization
 	void LoadRoomSettings ()
@@ -474,11 +475,21 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	//**************************
 	// Bot Functions
 	//**************************
+
+	// Wait for move to load before playing bot move.
 	private void GetBotMove (int botLevel)
+	{
+		if (!botThinking)
+		{
+			StartCoroutine ("WaitForSeconds");
+		}
+	}
+
+	private void BotMove ()
 	{
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
-		if (players[(int)hash[rpk.currentTurn]] != botNames[botLevel]){ Debug.Log ("Not Bots turn."); return;}
+		if (players[(int)hash[rpk.currentTurn]] != botNames[(int)hash[rpk.botLevel]]){ Debug.Log ("Not Bots turn."); return;}
 
 		GameObject botManager = GameObject.Find ("BotManager");
 
@@ -487,6 +498,15 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		Debug.Log ("Bot Move: " + move);
 
-		PlayMoveOverNetwork (move, (string)botNames [botLevel]);
+		PlayMoveOverNetwork (move, (string)botNames [(int)hash[rpk.botLevel]]);
+
+	}
+
+	IEnumerator WaitForSeconds ()
+	{
+		botThinking = true;
+		yield return new WaitForSeconds (0.1f);
+		BotMove ();
+		botThinking = false;
 	}
 }

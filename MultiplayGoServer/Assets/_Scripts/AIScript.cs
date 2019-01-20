@@ -45,8 +45,6 @@ public class AIScript : MonoBehaviour {
 		moves.Add (move);
 
 
-
-
 		// Level 2
 		// Make or Take liberties.
 		if( botLvl >=2 )
