@@ -198,4 +198,16 @@ public class StoneManagerScript : MonoBehaviour {
 			}
 		}
 	}
+
+	public bool CheckMoveExist (string move)
+	{
+		bool exist = false;
+
+		for (int i=0; i<stones.Count; i++)
+		{
+			if (stones[i].coordinate == move){exist = true;}
+		}
+
+		return exist;
+	}
 }

@@ -10,10 +10,7 @@ public class RaycastScript : MonoBehaviour {
     public GameObject stoneManager;
 	public GameObject gameMenu;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
+	bool playingMove = false;
 	
 	// Update is called once per frame
 	void Update () {
@@ -26,7 +23,7 @@ public class RaycastScript : MonoBehaviour {
 
 			// Check if it is our turn.
 
-			if(activeGame)
+			if(activeGame && !playingMove)
 			{
 	            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
 	            RaycastHit hit;
@@ -34,13 +31,23 @@ public class RaycastScript : MonoBehaviour {
 	            if (Physics.Raycast(ray, out hit))
 	            {
 	                Vector3 pos = hit.point;
-					string coordinate = GameObject.Find ("_GobanManager").GetComponent<CoordinateManager> ().ClickToCoordinate (pos);
-					if(coordinate != "")
-					{ 
+					string coordinate = GameObject.Find ("_GobanManager")
+						.GetComponent<CoordinateManager> ().ClickToCoordinate (pos);
+					bool moveExist = GameObject.Find ("_StoneManager")
+						.GetComponent<StoneManagerScript> ().CheckMoveExist (coordinate);
+
+					if(coordinate != "" && !moveExist)
+					{
+						ChangePlayingMove (true);
 						GameObject.FindGameObjectWithTag ("RoomManager").GetComponent<RoomManager>().PlayMove(coordinate);
 					}
 	            }
 			}
         }
+	}
+
+	public void ChangePlayingMove (bool condition)
+	{
+		playingMove = condition;
 	}
 }

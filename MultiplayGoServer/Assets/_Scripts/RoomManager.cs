@@ -280,6 +280,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		// in case of disconnection and rejoining or for viewers who join
 		// late.
 		stoneManger.GetComponent<StoneManagerScript> ().CreateStone (move, color);
+		GameObject.Find ("_StoneManager").GetComponent<RaycastScript> ().ChangePlayingMove (false);
 
 		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){ return;}
 
@@ -470,5 +471,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			.PlayAMove ((int)hash[rpk.boardSize], playerColors[(int)hash[rpk.currentTurn]], (int)hash[rpk.botLevel]);
 
 		Debug.Log ("Bot Move: " + move);
+
+		PlayMoveOverNetwork (move, (string)botNames [botLevel]);
 	}
 }
