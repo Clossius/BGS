@@ -154,7 +154,7 @@ public class CoordinateManager : MonoBehaviour {
 	}
 
 	// Translate int coordinate into string coordinate.
-	string CoordinateToString ( int x, int z )
+	public string CoordinateToString ( int x, int z )
 	{
 		
 

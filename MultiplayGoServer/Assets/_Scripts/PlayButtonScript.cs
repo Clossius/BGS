@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PlayButtonScript : MonoBehaviour {
 
-	public void PlayButtonClicked ()
+	public void PlayButtonClicked (int ruleSet)
 	{
 		GameObject scripts = GameObject.Find ("_Scripts");
 
-		scripts.GetComponent<ButtonManagerScript> ().PlayButton ();
+		scripts.GetComponent<ButtonManagerScript> ().PlayButton (ruleSet);
 	}
 }

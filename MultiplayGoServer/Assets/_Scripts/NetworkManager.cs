@@ -67,8 +67,6 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	public void ConnectToNetwork ()
 	{
 		PhotonNetwork.ConnectUsingSettings ();
-		//PhotonNetwork.ConnectToRegion ("us");
-		//LoadBalancingClient.ConnectToRegionMaster ("usw");
 	}
 
 	// When you connect to the master server.
@@ -77,7 +75,12 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 		Debug.Log ("Connected to Master.");
 		Debug.Log ("Region: " + PhotonNetwork.CloudRegion.ToString());
 		Debug.Log ("Version: " + PhotonNetwork.AppVersion);
-		GameObject.Find ("VersionText").GetComponent<VersionText> ().SetVersion ();
+
+		if(SceneManager.GetActiveScene().name == "LoginScene")
+		{
+			GameObject.Find ("VersionText").GetComponent<VersionText> ().SetVersion ();
+		}
+
 		JoinLobby();
 
 		// If in the Login Scene. Find the scene manager object and call the connected funtion
@@ -103,11 +106,11 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	{
 		Debug.Log ("Joined lobby.");
 		GameObject.Find ("SoundManager").GetComponent<SoundManagerScript> ().PlayBackgroundOne ();
-		if (PhotonNetwork.NickName != "")
+		if (PhotonNetwork.NickName != "" && SceneManager.GetActiveScene().name == "MenuScene")
 		{
 			GameObject.Find ("MenuScreen").GetComponent<MenuButtonManager>().LoadMenuSettings();
-			GameObject.Find ("MenuScreen").GetComponent<TopBarSettings> ().
-			SetOnlineUsersText (PhotonNetwork.CountOfPlayers);
+			GameObject.Find ("MenuScreen").GetComponent<TopBarSettings> ()
+				.SetOnlineUsersText (PhotonNetwork.CountOfPlayers);
 		}
 			
 	}

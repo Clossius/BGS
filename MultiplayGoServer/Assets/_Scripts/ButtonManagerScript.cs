@@ -68,8 +68,10 @@ public class ButtonManagerScript : MonoBehaviour {
 
 	// Opens the Game menu and board.
 	// Sets up room with given conditions.
-	public void PlayButton ()
+	public void PlayButton (int ruleSet)
 	{
+		GameObject.Find ("LocalRoomSettings").GetComponent<LocalRoomSettings> ().UpdateRuleSet (ruleSet);
+
 		PlayButtonClickSound ();
 		SceneManager.LoadScene ("Game");
 

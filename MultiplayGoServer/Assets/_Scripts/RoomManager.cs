@@ -20,6 +20,7 @@ public class RoomPropertyKeys
 	public string playerTwoTime = "ptt";
 	public string isVisible = "iv";
 	public string isOpen = "io";
+	public string botLevel = "bl";
 }
 
 public class RoomManager : MonoBehaviourPunCallbacks {
@@ -38,6 +39,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	GameObject stoneManger;
 	public List<int> playerColors;
 	List<string> players;
+	List<string> botNames;
 
 	// Initialization
 	void Start ()
@@ -47,8 +49,28 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		pv = this.GetComponent<PhotonView> ();
 		stoneManger = GameObject.Find ("_StoneManager");
 		playerColors = new List<int> ();
+		InitializeBotNames ();
 	}
-		
+
+	private void InitializeBotNames ()
+	{
+		botNames = new List<string> () {
+			"Idiot Bot",
+			"Learning Bot",
+			"Fancy Bot",
+			"Fighter Bot",
+			"Clossi Bot"
+
+		};
+	}
+
+	/// <summary>
+	/// Initializes the room settings.
+	/// Takes in an int for the Game Mode.
+	/// 0 = Capture Go
+	/// 1 = Capture Go with Bot
+	/// </summary>
+	/// <param name="gameMode">Game mode.</param>
 	// Initialize the room settings.
 	public void InitializeRoomSettings ()
 	{
@@ -66,22 +88,24 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 			hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
-			if(hash == null){ Debug.Log ("No Custom Properties found in current room."); }
+			if(hash == null){ Debug.Log ("ERROR: No Custom Properties found in current room."); }
 
 			return;
 		}
-			
 
-		hash.Add (rpk.boardSize, 9);
+		LocalSettings localSettings = GameObject.Find ("LocalRoomSettings").GetComponent<LocalRoomSettings> ().localSettings;
+
+		hash.Add (rpk.boardSize, localSettings.boardSize);
 		hash.Add (rpk.currentTurn, 0);
-		hash.Add (rpk.numPlayers, 2);
-		hash.Add (rpk.ruleSet, 0);
+		hash.Add (rpk.numPlayers, localSettings.maxPlayers);
+		hash.Add (rpk.ruleSet, localSettings.ruleSet);
 		hash.Add (rpk.timeSet, 0);
 		hash.Add (rpk.activeGame, false);
 		hash.Add (rpk.playerOneName, "");
 		hash.Add (rpk.playerTwoName, "");
-		hash.Add (rpk.isOpen, true);
-		hash.Add (rpk.isVisible, true);
+		hash.Add (rpk.isOpen, localSettings.roomJoinable);
+		hash.Add (rpk.isVisible, localSettings.roomVisible);
+		hash.Add (rpk.botLevel, localSettings.botLevel);
 
 		string[] lobbyProperties = new string[] {
 			rpk.boardSize,
@@ -97,8 +121,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		PhotonNetwork.CurrentRoom.SetPropertiesListedInLobby (lobbyProperties);
 
-		string username = PhotonNetwork.NickName;
-		hash [rpk.playerOneName] = username;
+		hash [rpk.playerOneName] = PhotonNetwork.NickName;
 
 		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 
@@ -107,13 +130,18 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 				, (string)PhotonNetwork.CurrentRoom.CustomProperties[rpk.playerTwoName], 0, 0);
 
 		GameObject.Find ("GameMenu").GetComponent<SubMenu> ().JoinRoom (PhotonNetwork.CurrentRoom.Name);
+
+		if((int)hash[rpk.ruleSet] == 1){InitializeCaptureGoBotSettings ((int)hash[rpk.botLevel]);}
+	}
+
+	private void InitializeCaptureGoBotSettings (int botLevel)
+	{
+		OnPlayerJoined (botNames[botLevel]);
 	}
 
 	// Player joined
 	public void OnPlayerJoined (string username)
 	{
-		Debug.Log ("Player Joined: " + username);
-
 		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){Start (); return;}
 
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
@@ -138,6 +166,11 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			players.Add ((string)hash[rpk.playerTwoName]);
 
 			pv.RPC ("GameRoomSetup", RpcTarget.All, (string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName], playerColors[0], playerColors[1]);
+
+			if ((int)hash[rpk.ruleSet] == 1) // Playing a Bot.
+			{
+				GetBotMove ((int)hash[rpk.botLevel]);
+			}
 		}
 	}
 
@@ -290,6 +323,8 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
+		if (ruleSet == 1){ ruleSet = 0;} // Playing Bot in Capture Go
+
 		if (ruleSet == 0 && captured) // Capture Go
 		{
 			string winner = players[(int)hash[rpk.currentTurn]];
@@ -420,5 +455,21 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			//TODO: Fix this when the players are kept track of over the network.
 			GameOver(PhotonNetwork.NickName, "Resignation");
 		}
+	}
+
+
+	//**************************
+	// Bot Functions
+	//**************************
+	private void GetBotMove (int botLevel)
+	{
+		Debug.Log ("Bot Playing Move!");
+		GameObject botManager = GameObject.Find ("BotManager");
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+		string move = botManager.GetComponent<AIScript> ()
+			.PlayAMove ((int)hash[rpk.boardSize], playerColors[(int)hash[rpk.currentTurn]], (int)hash[rpk.botLevel]);
+
+		Debug.Log ("Bot Move: " + move);
 	}
 }

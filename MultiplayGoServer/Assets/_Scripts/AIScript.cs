@@ -9,20 +9,18 @@ public class AIScript : MonoBehaviour {
     // where to play.
     // This AI plays capture Go.
 
-
-    int botLvl = 0;
-
-	public void SetBotLvl (int level)
-    {
-		botLvl = level;
-    }
-
     // Gets a move to play for the AI.
-	public string PlayAMove(int boardSize, int color)
+	public string PlayAMove(int boardSize, int color, int botLevel)
     {
         string move = "";
-
-		move = GetMove(boardSize, color);
+		List<Stone> stones = GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ().GetStones ();
+		if (stones.Count > 0) {
+			move = GetMove (boardSize, color, botLevel);
+		} else {
+			int x = (boardSize + 1) / 2;
+			int z = (boardSize + 1) / 2;
+			move = GameObject.Find ("_GobanManager").GetComponent<CoordinateManager>().CoordinateToString(x-1, z-1);
+		}
 
 		if (move == "") {
 			Debug.Log ("ERROR: Couldn't find move.");
@@ -36,7 +34,7 @@ public class AIScript : MonoBehaviour {
     // Level 1 can see atari
     // Level 2 will take an opponent's liberty
     // Level 3 will play on the group with the least amount of liberties.
-	string GetMove (int boardSize, int color)
+	string GetMove (int boardSize, int color, int botLvl)
     {
 		string move = "";
 		List<string> moves = new List<string>();
@@ -172,7 +170,7 @@ public class AIScript : MonoBehaviour {
 	bool CheckForLegalMove ( string move, int color, int boardSize )
 	{
 		bool legal = false;
-		GameObject stoneManager = GameObject.Find ("StoneManager");
+		GameObject stoneManager = GameObject.Find ("_StoneManager");
 		List<Stone> stones = stoneManager.GetComponent<StoneManagerScript> ().GetStones();
 
 		bool moveExist = false;
@@ -216,14 +214,14 @@ public class AIScript : MonoBehaviour {
 	// Find all the moves with 1 liberty
 	List<string> GetStonesInAtari ( int color, int boardSize )
 	{
-		List<Stone> stones = GameObject.Find("StoneManager").GetComponent<StoneManagerScript>().GetStones();
+		List<Stone> stones = GameObject.Find("_StoneManager").GetComponent<StoneManagerScript>().GetStones();
 		List<string> movesInAtari = new List<string>();
 
 		for( int i=0; i<stones.Count; i++ )
 		{
 			if( stones[i].color == color )
 			{
-				int liberties = GameObject.Find("StoneManager")
+				int liberties = GameObject.Find("_StoneManager")
 						.GetComponent<LibertyManager>().GetLiberties( stones[i].coordinate, stones,  boardSize );
 
 				if( liberties == 1 ){ movesInAtari.Add( stones[i].coordinate ); }
@@ -237,7 +235,7 @@ public class AIScript : MonoBehaviour {
 	List<string> GetLibertiesOfMoves ( List<string> movesToCheck, int boardSize )
 	{
 		List<string> moves = new List<string>();
-		List<Stone> stones = GameObject.Find("StoneManager").GetComponent<StoneManagerScript>().GetStones();
+		List<Stone> stones = GameObject.Find("_StoneManager").GetComponent<StoneManagerScript>().GetStones();
 
 		for( int i=0; i <movesToCheck.Count; i++ )
 		{
@@ -251,7 +249,7 @@ public class AIScript : MonoBehaviour {
 	List<string> GetLibertiesCoordinatesOfMove ( string move, List<Stone> stones, int boardSize )
 	{
 		List<string> moves = new List<string> ();
-		moves = GameObject.Find ("StoneManager").GetComponent<LibertyManager> ().GetLibertyCoordinates (move, stones, boardSize);
+		moves = GameObject.Find ("_StoneManager").GetComponent<LibertyManager> ().GetLibertyCoordinates (move, stones, boardSize);
 		return moves;
 	}
 
@@ -265,7 +263,7 @@ public class AIScript : MonoBehaviour {
 		{
 			if( !moves.ContainsKey(liberties[i]) )
 			{
-				int lib = this.GetComponent<StoneManager>().GetLiberties( liberties[i], color );
+				int lib = this.GetComponent<_StoneManager>().GetLiberties( liberties[i], color );
 
 				if( lib >= curLib )
 				{
