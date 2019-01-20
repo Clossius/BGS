@@ -42,8 +42,9 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	List<string> botNames;
 
 	// Initialization
-	void Start ()
+	void LoadRoomSettings ()
 	{
+		Debug.Log ("Start Function is being called.");
 		hash = new ExitGames.Client.Photon.Hashtable ();
 		rpk = new RoomPropertyKeys();
 		pv = this.GetComponent<PhotonView> ();
@@ -74,8 +75,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	// Initialize the room settings.
 	public void InitializeRoomSettings ()
 	{
-		Start ();
-
+		LoadRoomSettings ();
 		if(!PhotonNetwork.IsMasterClient)
 		{
 			Debug.Log ("Not the master client.");
@@ -142,7 +142,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	// Player joined
 	public void OnPlayerJoined (string username)
 	{
-		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){Start (); return;}
+		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){LoadRoomSettings (); return;}
 
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 		bool gameActive = (bool)hash[rpk.activeGame];
@@ -178,14 +178,12 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	private void SetPlayerColors (int maxPlayers)
 	{
 		playerColors = GameObject.Find ("_Scripts").GetComponent<RandomScript>().RandomIntStartList(0, maxPlayers);
-
 	}
 
 	// Set current turn to the given color
 	private void ResetCurrentTurn (int color)
 	{
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
-
 		for(int i=0; i<playerColors.Count;i++)
 		{
 			if(playerColors[i] == color){hash [rpk.currentTurn] = i;}
@@ -244,7 +242,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		// TODO: Add a way to load and save moves on the server.
 
-
 		if(username == players[(int)hash[rpk.currentTurn]])
 		{
 			// Check for legal move.
@@ -253,7 +250,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			stoneManger.GetComponent<StoneManagerScript> ().CreateStone (move, playerColors[(int)hash[rpk.currentTurn]]);
 			List<Stone> stones = stoneManger.GetComponent<StoneManagerScript> ().GetStones ();
 			bool legal = CheckForSuicideMove (move, stones, (int)hash[rpk.boardSize]);
-			Debug.Log ("Legal move: " + legal.ToString());
 			stoneManger.GetComponent<StoneManagerScript> ().RemoveMove (move);
 
 			if (legal)
@@ -269,7 +265,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	private bool CheckForSuicideMove (string move, List<Stone> stones, int boardSize)
 	{
 		bool legal = true;
-
 		int liberties = stoneManger.GetComponent<LibertyManager> ().GetLiberties (move, stones, boardSize);
 		bool capturing = stoneManger.GetComponent<LibertyManager> ().CheckForCapturing (move, stones, boardSize);
 
@@ -297,7 +292,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		// Check for win condition.
 		if (capture)
 		{
-			Debug.Log ("Something Captured!");
 			// TODO: Check if the rule set is capture Go or not.
 
 			hash = PhotonNetwork.CurrentRoom.CustomProperties;
@@ -381,6 +375,11 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 			hash [rpk.currentTurn] = currentTurn;
 			PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
+
+			if((int)hash[rpk.ruleSet] == 1)
+			{
+				GetBotMove ((int)hash[rpk.botLevel]);
+			}
 		}
 	}
 
@@ -393,8 +392,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		for (int i=0; i<stones.Count; i++)
 		{
 			int liberties = GameObject.Find ("_StoneManager").GetComponent<LibertyManager> ().GetLiberties (stones[i].coordinate, stones, boardSize);
-
-			Debug.Log (stones[i].coordinate + " : " + liberties.ToString());
 
 			if (liberties == 0){ capture = true; }
 		}
@@ -463,10 +460,12 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	//**************************
 	private void GetBotMove (int botLevel)
 	{
-		Debug.Log ("Bot Playing Move!");
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		if (players[(int)hash[rpk.currentTurn]] != botNames[botLevel]){ Debug.Log ("Not Bots turn."); return;}
+
 		GameObject botManager = GameObject.Find ("BotManager");
 
-		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 		string move = botManager.GetComponent<AIScript> ()
 			.PlayAMove ((int)hash[rpk.boardSize], playerColors[(int)hash[rpk.currentTurn]], (int)hash[rpk.botLevel]);
 

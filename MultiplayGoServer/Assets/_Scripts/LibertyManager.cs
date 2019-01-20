@@ -24,8 +24,6 @@ public class LibertyManager : MonoBehaviour {
 		List<string> moveString = new List<string> ();
 		moveString.Add (move);
 
-		Debug.Log ("Getting String of moves.");
-
 		int color = -1;
 		int index = -1;
 
@@ -61,7 +59,7 @@ public class LibertyManager : MonoBehaviour {
 					bool alreadyChecked = AlreadyChecked (moveString, touchingCoords[g]);
 					bool sameColor = CompareColors (move, touchingCoords[g], stones);
 
-					if(sameColor && !alreadyChecked){moveString.Add (touchingCoords[g]); Debug.Log ("Connected Stone: " + touchingCoords[g]);}
+					if(sameColor && !alreadyChecked){moveString.Add (touchingCoords[g]);}
 				}
 			}
 
@@ -71,9 +69,7 @@ public class LibertyManager : MonoBehaviour {
 				break;
 			}
 		}
-
-		Debug.Log ("Moves in Move String: " + moveString.Count.ToString());
-
+			
 		return moveString;
 	}
 
@@ -103,8 +99,6 @@ public class LibertyManager : MonoBehaviour {
 		int z = gobanManager.GetComponent<CoordinateManager> ().GetZInt (move, boardSize);
 
 		List<string> touchingCoordinate = new List<string> ();
-
-		Debug.Log ("Getting touching coordinates for " + move);
 
 		// Check above
 		if(z+1 <= boardSize)
@@ -141,10 +135,7 @@ public class LibertyManager : MonoBehaviour {
 
 			touchingCoordinate.Add (newCoord);
 		}
-
-		Debug.Log ("Touching coordinates found: " + touchingCoordinate.Count);
-		for(int i=0; i<touchingCoordinate.Count; i++){Debug.Log ("Touching Coor: " + touchingCoordinate[i]);}
-
+			
 		return touchingCoordinate;
 	}
 
@@ -155,7 +146,7 @@ public class LibertyManager : MonoBehaviour {
 
 		for (int i=0; i<stones.Count; i++)
 		{
-			if (stones[i].coordinate == move){exist = true; Debug.Log ("Move Found: " + stones[i].coordinate);}
+			if (stones[i].coordinate == move){exist = true;}
 		}
 
 		return exist;
@@ -196,9 +187,6 @@ public class LibertyManager : MonoBehaviour {
 	{
 		int liberties = -1;
 
-		Debug.Log ("Getting Liberties for move " + move);
-		Debug.Log ("Board Size: " + boardSize.ToString());
-
 		List<string> movesToCheck = GetStringOfMoves (move, stones, boardSize);
 
 		if (movesToCheck.Count > 0) {
@@ -211,8 +199,6 @@ public class LibertyManager : MonoBehaviour {
 		List<string> libertyCoordinates = new List<string>();
 		for (int i=0; i<movesToCheck.Count; i++)
 		{
-			Debug.Log ("Checking local liberties for " + movesToCheck[0]);
-
 			List<string> touchingCoords = GetTouchingCoordinates (movesToCheck [i], boardSize);
 
 			for (int g=0; g<touchingCoords.Count; g++)
@@ -228,8 +214,6 @@ public class LibertyManager : MonoBehaviour {
 
 		liberties = libertyCoordinates.Count;
 			
-		Debug.Log ("Liberties found " + liberties);
-
 		return liberties;
 	}
 

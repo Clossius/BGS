@@ -173,7 +173,6 @@ public class StoneManagerScript : MonoBehaviour {
 			Debug.Log ("ERROR: Nothing found at index.");
 			return;
 		}
-		Debug.Log ("Removing Stone at " + stones[index].coordinate);
 		Destroy (stones[index].stone);
 		stones.RemoveAt (index);
 	}
