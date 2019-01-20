@@ -45,19 +45,7 @@ public class AIScript : MonoBehaviour {
 		moves.Add (move);
 
 
-		// Level 3
-		// Play on the group with the lowest liberties.
-		// Also sorts the liberties by weight.
-		// Weight is determind by distance from the center.
-		// The closer to the center, the higher the weight.
-        if( botLvl >= 3 )
-        {
-			List<string> lowestLibertyMoves = SortedStonesByLiberties (color, boardSize);
-			List<string> coloredLibertyList = ColorSortedLiberties( lowestLibertyMoves, color, boardSize);
-			List<string> movesToPlay = SortLibByMostLib( coloredLibertyList, boardSize );
 
-			moves = AddMoves( moves, movesToPlay );
-        }
 
 		// Level 2
 		// Make or Take liberties.
@@ -65,6 +53,20 @@ public class AIScript : MonoBehaviour {
 		{
 			List<string> lowestLibertyMoves = MakeTakeLiberty( color, boardSize );
 			moves = AddMoves( moves, lowestLibertyMoves );
+		}
+
+		// Level 3
+		// Play on the group with the lowest liberties.
+		// Also sorts the liberties by weight.
+		// Weight is determind by distance from the center.
+		// The closer to the center, the higher the weight.
+		if( botLvl >= 3 )
+		{
+			List<string> lowestLibertyMoves = SortedStonesByLiberties (color, boardSize);
+			List<string> coloredLibertyList = ColorSortedLiberties( lowestLibertyMoves, color, boardSize);
+			List<string> movesToPlay = SortLibByMostLib( coloredLibertyList, boardSize );
+
+			moves = AddMoves( moves, movesToPlay );
 		}
 
 		// Level 1
