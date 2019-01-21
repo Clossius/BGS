@@ -256,7 +256,7 @@ public class LibertyManager : MonoBehaviour {
 
 	// Check for duplicate coordinates in the list<string> provided.
 	// When a duplicate is found, the move is removed from the list.
-	private List<string> RemoveDuplicates (List<string> moves)
+	public List<string> RemoveDuplicates (List<string> moves)
 	{
 		int loopCounter = 0;
 		for (int i=0; i<moves.Count; i++)

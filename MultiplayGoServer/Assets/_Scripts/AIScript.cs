@@ -61,10 +61,9 @@ public class AIScript : MonoBehaviour {
 		if( botLvl >= 3 )
 		{
 			List<string> lowestLibertyMoves = SortedStonesByLiberties (color, boardSize);
-			List<string> coloredLibertyList = ColorSortedLiberties( lowestLibertyMoves, color, boardSize);
-			List<string> movesToPlay = SortLibByMostLib( coloredLibertyList, boardSize );
-
-			moves = AddMoves( moves, movesToPlay );
+			// Get the liberties of each stone and sort them by weight.
+			List<string> sortedLiberties = GetSortedLibertiesByWeight(lowestLibertyMoves, boardSize);
+			moves = AddMoves( moves, sortedLiberties );
 		}
 
 		// Level 1
@@ -85,7 +84,8 @@ public class AIScript : MonoBehaviour {
 
 	        	if( legal )
 	        	{  
-	        		move=moves[i]; 
+	        		move=moves[i];
+					Debug.Log (move);
 	        	}
 			}
         }
@@ -286,50 +286,7 @@ public class AIScript : MonoBehaviour {
 		return reOrdered;
 	}*/
 
-	// Sort liberty list to have opp color first if the liberties are the same.
-	List<string> ColorSortedLiberties ( List<string> sortedMovesByLiberties, int color, int boardSize )
-	{
-		List<string> newList = new List<string>();
 
-		int maxLib = 0;
-		for( int curLib=0; curLib<=maxLib; curLib++ )
-		{
-			List<string> currentMoves = new List<string>();
-			for( int i=0; i<sortedMovesByLiberties.Count; i++ )
-			{
-				List<Stone> stones = GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ().GetStones ();
-				List<string> liberties = GetLibertiesCoordinatesOfMove( sortedMovesByLiberties[i], stones, boardSize);
-				if( liberties.Count > maxLib ){ maxLib = liberties.Count; }
-
-				if( liberties.Count == curLib ){ currentMoves.Add(sortedMovesByLiberties[i]); }
-			}
-
-			// Add the oppenet's moves
-			List<int> colors = GameObject.FindGameObjectWithTag("RoomManager").GetComponent<RoomManager>().playerColors;
-			List<string> oppMoves = new List<string> ();
-			for (int i=0; i<colors.Count; i++)
-			{
-				if (colors [i] != color) {
-					oppMoves = GetColoredStonesInList (currentMoves, colors[i]);
-				}
-			}
-
-			// Add your moves
-			List<string> myMoves = GetColoredStonesInList( currentMoves, color );
-
-			for( int i=0; i<oppMoves.Count; i++ )
-			{
-				newList.Add( oppMoves[i] );
-			}
-
-			for( int i=0; i<myMoves.Count; i++ )
-			{
-				newList.Add( myMoves[i] );
-			}
-		}
-
-		return newList;
-	}
 
 	// Get list of stones that are the given color in the list provided
 	List<string> GetColoredStonesInList ( List<string> moves, int color )
@@ -391,90 +348,7 @@ public class AIScript : MonoBehaviour {
 
     	return sortedStones;
     }
-
-	/// <summary>
-	/// Sort liberties by most liberties.
-	/// </summary>
-	/// <returns>A sorted list of coordinates by liberties.
-	/// </returns>
-	/// <param name="liberties">Liberties.</param>
-	/// <param name="boardSize">Board size.</param>
-    // Sort liberties by most liberties
-	List<string> SortLibByMostLib ( List<string> liberties, int boardSize )
-    {
-    	Hashtable lib = new Hashtable();
-		List<Stone> stones = GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ().GetStones ();
-    	for( int i=0; i<liberties.Count; i++ )
-    	{
-			List<string> curLib = GameObject.Find("_StoneManager")
-				.GetComponent<LibertyManager>().GetLibertyCoordinates( liberties[i], stones, boardSize );
-			lib.Add( liberties[i], curLib.Count );
-    	}
-
-    	List<string> sortedLib = OrderedString( liberties, lib );
-		sortedLib = SortByWeightAndLiberties( sortedLib, boardSize );
-
-    	return sortedLib;
-    }
-
-	/// <summary>
-	/// Sorts the coordinates by weight and liberties.
-	/// Liberties are sorted from lowest to highest.
-	/// Weight is sorted from least to greatest.
-	/// Weight is determined by distance from Tengen.
-	/// </summary>
-	/// <returns>The by weight and liberties.</returns>
-	/// <param name="liberties">List of coordinates that are a liberty.</param>
-	/// <param name="boardSize">Board size.</param>
-    // Sort the liberties by most liberties and by weight
-	List<string> SortByWeightAndLiberties ( List<string> liberties, int boardSize )
-    {
-    	int maxLib = 0;
-    	Hashtable weightedLib = new Hashtable();
-    	List<string> sorted = new List<string>();
-
-    	for( int lib=0; lib<=maxLib; lib++ )
-    	{
-    		for( int i=0; i<liberties.Count; i++ )
-    		{
-				GameObject stoneManager = GameObject.Find ("_StoneManager");
-				List<Stone> stones = stoneManager.GetComponent<StoneManagerScript> ().GetStones ();
-
-				List<string> curLib = stoneManager
-					.GetComponent<LibertyManager>().GetLibertyCoordinates( liberties[i], stones, boardSize );
-
-    			if(curLib.Count > maxLib){ maxLib = curLib.Count; }
-
-    			if( curLib.Count == lib )
-    			{
-					int weight = GetWeightOfLiberty( liberties[i], boardSize );
-    				weightedLib.Add( liberties[i], weight );
-    			}
-    		}
-    	}
-
-    	for( int lib = 0; lib<maxLib; lib++ )
-    	{
-    		List<string> libertiesBeforeWeight = new List<string>();
-    		for( int i=0; i<liberties.Count; i++ )
-    		{ 
-				List<Stone> stones = GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ().GetStones ();
-				List<string> curLib = GameObject.Find("_StoneManager")
-					.GetComponent<LibertyManager>().GetLibertyCoordinates( liberties[i], stones, boardSize );
-
-				if( curLib.Count == lib ){ libertiesBeforeWeight.Add( liberties[i] ); }
-    		}
-
-			List<string> afterWeight = OrderedString( libertiesBeforeWeight, weightedLib );
-
-			for( int i=0; i<afterWeight.Count; i++ )
-			{
-				sorted.Add( afterWeight[i] );
-			}
-    	}
-
-    	return sorted;
-    }
+		
 
 	/// <summary>
 	/// Sorts the liberties by weight.
@@ -484,32 +358,38 @@ public class AIScript : MonoBehaviour {
 	/// <returns>The liberties by weight.</returns>
 	/// <param name="liberties">List of coordinates that are a liberty.</param>
 	/// <param name="boardSize">Board size.</param>
-	List<string> SortedLibertiesByWeight ( List<string> liberties, int boardSize )
+	List<string> GetSortedLibertiesByWeight ( List<string> moves, int boardSize )
     {
-		Hashtable weights = new Hashtable();
+		List<string> sortedLibs = new List<string> ();
 
-		for( int i=0; i<liberties.Count; i++ )
+		for( int i=0; i<moves.Count; i++ )
 		{
-			if( !weights.ContainsKey(liberties[i]) )
-			{ 
-				int weight = GetWeightOfLiberty(liberties[i], boardSize );
-				weights.Add( liberties[i], weight );
-			}
-		}
+			GameObject stoneManager = GameObject.Find ("_StoneManager");
+			List<Stone> stones = stoneManager.GetComponent<StoneManagerScript> ().GetStones ();
 
-		List<string> sortedLibs = new List<string>();
+			Hashtable weights = new Hashtable();
+			List<string> liberties = new List<string> ();
 
-		for( int i=0; i<5; i++ )
-		{
-			for( int g=0; g<liberties.Count; g++ )
+			liberties = GameObject.Find ("_StoneManager").GetComponent<LibertyManager> ()
+				.GetLibertyCoordinates (moves [i], stones, boardSize);
+			Debug.Log (liberties.Count);
+			for (int g=0; g<liberties.Count; g++)
 			{
-				if( (int)weights[liberties[g]] == i )
+				if( !weights.ContainsKey(liberties[g]) )
 				{ 
-					sortedLibs.Add(liberties[g]); 
+					int weight = GetWeightOfLiberty(liberties[g], boardSize );
+					weights.Add( liberties[g], weight );
 				}
 			}
+			List<string> sortedLiberties = OrderedString (liberties, weights);
+			// sortedLiberties = 
+			for (int g=0; g<sortedLibs.Count; g++)
+			{
+				sortedLibs.Add (sortedLiberties[g]);
+			}
 		}
-
+			
+		Debug.Log ("Test5");
     	return sortedLibs;
     }
 
