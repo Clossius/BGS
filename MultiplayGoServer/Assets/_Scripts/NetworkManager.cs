@@ -162,7 +162,7 @@ public class NetworkManager: MonoBehaviourPunCallbacks {
 	// Join random room or create one.
 	public void JoinCustomRandomRoom ()
 	{
-		Debug.Log ("Rooms found: " + localRooms.Count + "/" + localRooms.Count);
+		//Debug.Log ("Rooms found: " + localRooms.Count + "/" + localRooms.Count);
 		RoomOptions ro = new RoomOptions ();
 
 		if (localRooms.Count == 0) {

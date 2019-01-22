@@ -41,7 +41,7 @@ public class SubMenu : MonoBehaviour {
 
 		pOneUser.text = playerOne;
 		pTwoUser.text = playerTwo;
-
+		Debug.Log ("Updating player names.");
 		// TODO: Adjust the functions below to use only SetPlayerColors in the future.
 		SetPlayerColor (0, pOneColor);
 		SetPlayerColor (1, pTwoColor);

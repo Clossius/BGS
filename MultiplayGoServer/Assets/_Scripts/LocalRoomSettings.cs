@@ -10,6 +10,7 @@ public class LocalSettings
 	public bool roomVisible;
 	public bool roomJoinable;
 	public int botLevel;
+	public int campaignLevel;
 }
 
 /// <summary>
@@ -36,6 +37,29 @@ public class LocalRoomSettings : MonoBehaviour
 		localSettings.roomVisible = true;
 		localSettings.roomJoinable = true;
 		localSettings.botLevel = 3;
+		localSettings.campaignLevel = 0;
+	}
+
+	public void LoadCampaignSettings ()
+	{
+		localSettings.boardSize = 9;
+		localSettings.ruleSet = 2;
+		localSettings.maxPlayers = 2;
+		localSettings.roomVisible = false;
+		localSettings.roomJoinable = false;
+		localSettings.botLevel = 0;
+		localSettings.campaignLevel = 0;
+	}
+
+	public void LoadBotSettings (int botLevel)
+	{
+		localSettings.boardSize = 9;
+		localSettings.ruleSet = 1;
+		localSettings.maxPlayers = 2;
+		localSettings.roomVisible = false;
+		localSettings.roomJoinable = false;
+		localSettings.botLevel = botLevel;
+		localSettings.campaignLevel = 0;
 	}
 
 	public LocalSettings GetLocalRoomSettings ()
@@ -71,5 +95,23 @@ public class LocalRoomSettings : MonoBehaviour
 	public void UpdateBotSettings (int level)
 	{
 		localSettings.botLevel = level;
+	}
+
+	public void LoadSettingsByRuleSet (int ruleSet)
+	{
+		if (ruleSet == 0)
+		{
+			LoadCaptureGoSettings ();
+		}
+
+		else if (ruleSet == 1)
+		{
+			LoadBotSettings (3);
+		}
+
+		else if (ruleSet == 2)
+		{
+			LoadCampaignSettings ();
+		}
 	}
 }

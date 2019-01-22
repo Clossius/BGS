@@ -70,7 +70,7 @@ public class ButtonManagerScript : MonoBehaviour {
 	// Sets up room with given conditions.
 	public void PlayButton (int ruleSet)
 	{
-		GameObject.Find ("LocalRoomSettings").GetComponent<LocalRoomSettings> ().UpdateRuleSet (ruleSet);
+		GameObject.Find ("LocalRoomSettings").GetComponent<LocalRoomSettings> ().LoadSettingsByRuleSet (ruleSet);
 
 		PlayButtonClickSound ();
 		SceneManager.LoadScene ("Game");

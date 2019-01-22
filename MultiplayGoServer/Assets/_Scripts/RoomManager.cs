@@ -21,6 +21,7 @@ public class RoomPropertyKeys
 	public string isVisible = "iv";
 	public string isOpen = "io";
 	public string botLevel = "bl";
+	public string campaignLevel = "cl";
 }
 
 public class RoomManager : MonoBehaviourPunCallbacks {
@@ -107,6 +108,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		hash.Add (rpk.isOpen, localSettings.roomJoinable);
 		hash.Add (rpk.isVisible, localSettings.roomVisible);
 		hash.Add (rpk.botLevel, localSettings.botLevel);
+		hash.Add (rpk.campaignLevel, localSettings.campaignLevel);
 
 		string[] lobbyProperties = new string[] {
 			rpk.boardSize,
@@ -133,6 +135,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		GameObject.Find ("GameMenu").GetComponent<SubMenu> ().JoinRoom (PhotonNetwork.CurrentRoom.Name);
 
 		if((int)hash[rpk.ruleSet] == 1){InitializeCaptureGoBotSettings ((int)hash[rpk.botLevel]);}
+		if((int)hash[rpk.ruleSet] == 2){InitializeCampaignSettings ();}
 	}
 
 	private void InitializeCaptureGoBotSettings (int botLevel)
@@ -508,5 +511,18 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		yield return new WaitForSeconds (0.1f);
 		BotMove ();
 		botThinking = false;
+	}
+
+	//********************
+	// Campaign
+	//********************
+
+	private void InitializeCampaignSettings ()
+	{
+		GameObject gameMenu = GameObject.Find ("GameMenu");
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		gameMenu.GetComponent<TutorialScript> ().LoadCampaign ((int)hash[rpk.campaignLevel]);
 	}
 }
