@@ -20,6 +20,7 @@ public class TutorialScript : MonoBehaviour
 	// Local Variables
 	private int campaignLevel = 0;
 	private int commentIndex = 0;
+	private int nameIndex = 0;
 
 	// List
 	List<string> comments;
@@ -41,10 +42,13 @@ public class TutorialScript : MonoBehaviour
 			"Oh! Hello there~",
 			"Hmm? This? This is Go. It's a fantastic game! Would you like to play?",
 			"Great! We are playing Capture Go. The rules are simple. The first one to surround "+
-			"and the other players stone or stones win.",
-			"Let's try playing a game! I will set up the board. Normally we play on an empty board, "+
-			"but in this case we will give you an advantage. Black goes first.",
-			"Game Start!"
+				"and the other players stone or stones win.",
+			"Let's try playing a game! I will set up the board.", 
+			"Normally we play on an empty board, " +
+				"but in this case we will give you an advantage. Black goes first.",
+			"Game Start!",
+			"Sorry, but no worries! You can try again!",
+			"Great job! You got it!"
 		};
 	}
 
@@ -70,18 +74,30 @@ public class TutorialScript : MonoBehaviour
 
 		text.text = comments[commentIndex];
 
-		commentIndex++;
-
 		if (commentIndex == comments.Count)
 		{
 			nextButton.SetActive (false);
 		}
 
-		if (commentIndex == 6)
+		if (commentIndex == 4)
 		{
-			Debug.Log ("Start the game!");
+			GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ().LoadSpecificStoneSet (0);
+
+		} else if (commentIndex == 5)
+		{
 			nextButton.SetActive (false);
+			GameObject roomManager = GameObject.FindGameObjectWithTag ("RoomManager");
+			roomManager.GetComponent<RoomManager> ().OnPlayerJoined (names[nameIndex]);
+
+			roomManager.GetComponent<RoomManager> ().SetPlayerColor (0, 0);
+			roomManager.GetComponent<RoomManager> ().SetPlayerColor (1, 1);
+
+			roomManager.GetComponent<RoomManager> ().StartGameForCampaign ();
+		} else if (commentIndex == 6) {
+			commentIndex = 2;
 		}
+
+		commentIndex++;
 	}
 
 	public void NextButtonClicked ()
@@ -95,12 +111,28 @@ public class TutorialScript : MonoBehaviour
 
 		if (campaignLevel == 0)
 		{
-			image.sprite = sprites [0];
-			name.text = names [0]; Debug.Log ("Updating player two name. " + names[0]);
+			image.sprite = sprites [nameIndex];
+			name.text = names [nameIndex];;
 			LoadComment();
 			subMenu.SetActive (false);
 		}
 	}
 
+	/// <summary>
+	/// Called when a game is finished during the tutorial.
+	/// </summary>
+	/// <param name="won">If set to <c>true</c> won.</param>
+	public void PlayedGame (bool won)
+	{
+		if (won) {
+			commentIndex++;
+		}
 
+		LoadComment ();
+	}
+
+	public string GetNPCName ()
+	{
+		return names[nameIndex];
+	}
 }

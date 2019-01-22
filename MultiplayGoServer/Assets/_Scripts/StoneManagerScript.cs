@@ -65,6 +65,8 @@ public class StoneManagerScript : MonoBehaviour {
 		Stone newStone = new Stone (newMove, coor, color);
 
 		stones.Add (newStone);
+
+		ShowLastMove ();
     }
 		
 	// Set color of the stone.
@@ -209,5 +211,35 @@ public class StoneManagerScript : MonoBehaviour {
 		}
 
 		return exist;
+	}
+
+	// Load specific stones on the board.
+	public void LoadSpecificStoneSet (int set)
+	{
+		DestroyStones ();
+
+		stones = new List<Stone> ();
+
+		if (set == 0) 
+		{
+			Debug.Log ("Loading Stones.");
+			CreateStone ("E6", 0);
+			CreateStone ("E4", 0);
+			CreateStone ("D5", 0);
+			CreateStone ("E5", 1);
+		}
+	}
+		
+	// Deactivates the marker above the stones
+	// on all but the last stone.
+	private void ShowLastMove ()
+	{
+		for (int i=0; i<stones.Count-1; i++)
+		{
+			GameObject stone = stones [i].stone;
+
+			GameObject marker = (GameObject)stone.transform.GetChild (0).gameObject;
+			marker.SetActive (false);
+		}
 	}
 }

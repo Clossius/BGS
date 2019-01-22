@@ -52,6 +52,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		pv = this.GetComponent<PhotonView> ();
 		stoneManger = GameObject.Find ("_StoneManager");
 		playerColors = new List<int> ();
+		players = new List<string> ();
 		InitializeBotNames ();
 	}
 
@@ -125,6 +126,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		PhotonNetwork.CurrentRoom.SetPropertiesListedInLobby (lobbyProperties);
 
 		hash [rpk.playerOneName] = PhotonNetwork.NickName;
+		players = new List<string>();
 
 		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 
@@ -165,7 +167,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			SetPlayerColors (2); // TODO: Set per room settings in the future for more than 2 players.
 			ResetCurrentTurn(0); // 0 is black. Change to default first color in the future.
 
-			players = new List<string>();
 			players.Add ((string)hash[rpk.playerOneName]);
 			players.Add ((string)hash[rpk.playerTwoName]);
 
@@ -175,6 +176,10 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			{
 				GetBotMove ((int)hash[rpk.botLevel]);
 			}
+			else if ((int)hash[rpk.ruleSet] == 2) // Playing Campaign
+			{
+				InitializeCampaignSettings ();
+			}
 		}
 	}
 
@@ -182,6 +187,16 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	private void SetPlayerColors (int maxPlayers)
 	{
 		playerColors = GameObject.Find ("_Scripts").GetComponent<RandomScript>().RandomIntStartList(0, maxPlayers);
+	}
+
+	// Set a specific color for a specific player.
+	public void SetPlayerColor (int player, int color)
+	{
+		playerColors [player] = color;
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		GameRoomSetup ((string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName], playerColors[0], playerColors[1]);
 	}
 
 	// Set current turn to the given color
@@ -245,7 +260,8 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		}
 
 		// TODO: Add a way to load and save moves on the server.
-
+		Debug.Log("Playing move.");
+		Debug.Log (username + " "  + players[(int)hash[rpk.currentTurn]]);
 		if(username == players[(int)hash[rpk.currentTurn]])
 		{
 			// Check for legal move.
@@ -337,7 +353,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
-		if (ruleSet == 1){ ruleSet = 0;} // Playing Bot in Capture Go
+		if (ruleSet == 1 || ruleSet == 2){ ruleSet = 0;} // Playing Bot in Capture Go
 
 		if (ruleSet == 0 && captured) // Capture Go
 		{
@@ -366,6 +382,13 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		GameObject gameMenu = GameObject.Find ("GameMenu");
 		gameMenu.GetComponent<SubMenu> ().GameOver (winner, wonBy);
 		gameMenu.GetComponent<GameButtonManager> ().ResetToDefault ();
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		if ((int)hash[rpk.ruleSet] == 2)
+		{
+			GameOverForCampaign (winner);
+		}
 	}
 
 	// Remove the stones of the given color with 0 liberties.
@@ -396,9 +419,12 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			hash [rpk.currentTurn] = currentTurn;
 			PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 
-			if((int)hash[rpk.ruleSet] == 1)
+			if((int)hash[rpk.ruleSet] == 1) // Playing bot.
 			{
 				GetBotMove ((int)hash[rpk.botLevel]);
+			} else if ((int)hash[rpk.ruleSet] == 2) // Playing tutorial
+			{
+				GetTutorialMove ();
 			}
 		}
 	}
@@ -492,7 +518,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	{
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
-		if (players[(int)hash[rpk.currentTurn]] != botNames[(int)hash[rpk.botLevel]]){ Debug.Log ("Not Bots turn."); return;}
+		if (players[(int)hash[rpk.currentTurn]] == PhotonNetwork.NickName){ Debug.Log ("Not Bots turn."); return;}
 
 		GameObject botManager = GameObject.Find ("BotManager");
 
@@ -519,10 +545,73 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 	private void InitializeCampaignSettings ()
 	{
+		Debug.Log ("Loading Campaign Settings.");
 		GameObject gameMenu = GameObject.Find ("GameMenu");
 
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
 		gameMenu.GetComponent<TutorialScript> ().LoadCampaign ((int)hash[rpk.campaignLevel]);
+
+
+	}
+
+	public void StartGameForCampaign ()
+	{
+		int index = 0;
+		for (int i=0; i<players.Count; i++)
+		{
+			if (players[i] == PhotonNetwork.NickName){index = i;}
+		}
+
+		hash [rpk.currentTurn] = index;
+
+		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
+
+	}
+
+	private void GameOverForCampaign (string winner)
+	{
+		Debug.Log ("Campaign Game Finished.");
+		GameObject.Find ("GameMenu").GetComponent<SubMenu> ().ChangeSubMenuActive (false);
+		if(winner == PhotonNetwork.NickName){
+			GameObject.Find ("GameMenu").GetComponent<TutorialScript>().PlayedGame(true);
+		} else {
+			GameObject.Find ("GameMenu").GetComponent<TutorialScript>().PlayedGame(false);
+		}
+	}
+
+	private void TutorialMove ()
+	{
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		if (players[(int)hash[rpk.currentTurn]] == PhotonNetwork.NickName){ Debug.Log ("Not Bots turn."); return;}
+
+		GameObject botManager = GameObject.Find ("BotManager");
+
+		string move = botManager.GetComponent<AIScript> ()
+			.PlayAMove ((int)hash[rpk.boardSize], playerColors[(int)hash[rpk.currentTurn]], (int)hash[rpk.botLevel]);
+
+		Debug.Log ("Bot Move: " + move);
+
+		string name = GameObject.Find ("GameMenu").GetComponent<TutorialScript> ().GetNPCName ();
+
+		PlayMoveOverNetwork (move, name);
+	}
+
+	// Wait for move to load before playing bot move.
+	private void GetTutorialMove ()
+	{
+		if (!botThinking)
+		{
+			StartCoroutine ("TutorialWaitForSeconds");
+		}
+	}
+
+	IEnumerator TutorialWaitForSeconds ()
+	{
+		botThinking = true;
+		yield return new WaitForSeconds (0.1f);
+		TutorialMove ();
+		botThinking = false;
 	}
 }

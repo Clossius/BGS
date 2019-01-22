@@ -109,4 +109,9 @@ public class SubMenu : MonoBehaviour {
 		title.text = "Game Over!";
 		info.text = winner + " is the winner!\nWon by " + wonBy;
 	}
+
+	public void ChangeSubMenuActive (bool active)
+	{
+		subMenu.SetActive (active);
+	}
 }
