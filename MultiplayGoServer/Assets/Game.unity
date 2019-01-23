@@ -3525,6 +3525,7 @@ MonoBehaviour:
   pOneTimeText: {fileID: 1120423210}
   pTwoTimeText: {fileID: 50144121}
   subMenu: {fileID: 996771923}
+  tutorialMenu: {fileID: 1829494208}
   pOneColor: {fileID: 449089333}
   pTwoColor: {fileID: 46140510}
 --- !u!114 &1151800955

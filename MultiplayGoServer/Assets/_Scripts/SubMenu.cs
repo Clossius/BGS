@@ -14,15 +14,17 @@ public class SubMenu : MonoBehaviour {
 	public GameObject pOneTimeText;
 	public GameObject pTwoTimeText;
 	public GameObject subMenu;
+	public GameObject tutorialMenu;
 	public Image pOneColor;
 	public Image pTwoColor;
 
 	// When a player joins a room
 	// this function gets called.
 	// Open the submenu and initialize text.
-	public void JoinRoom (string roomID)
+	public void JoinRoom (string roomID, int ruleSet)
 	{
 		subMenu.SetActive (true);
+		tutorialMenu.SetActive (false);
 
 		title = GameObject.FindGameObjectWithTag ("SubMenuTitle").GetComponent<TextMeshProUGUI>();
 		info = GameObject.FindGameObjectWithTag ("SubMenuInfo").GetComponent<TextMeshProUGUI>();
@@ -31,6 +33,14 @@ public class SubMenu : MonoBehaviour {
 		info.text = "Waiting for game to start.";
 
 		GameObject.Find ("GameMenu").GetComponent<GameButtonManager> ().ResetToDefault ();
+
+		if (ruleSet == 2) {
+			tutorialMenu.SetActive (true);
+			subMenu.SetActive (false);
+		} else if (ruleSet == 1)
+		{
+			subMenu.SetActive (false);
+		}
 	}
 
 	// Update the player information in a room.

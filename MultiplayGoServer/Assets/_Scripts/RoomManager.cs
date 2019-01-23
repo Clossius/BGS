@@ -40,7 +40,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	GameObject stoneManger;
 	public List<int> playerColors;
 	List<string> players;
-	List<string> botNames;
 	bool botThinking = false;
 
 	// Initialization
@@ -51,20 +50,9 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		rpk = new RoomPropertyKeys();
 		pv = this.GetComponent<PhotonView> ();
 		stoneManger = GameObject.Find ("_StoneManager");
-		InitializeBotNames ();
 	}
 
-	private void InitializeBotNames ()
-	{
-		botNames = new List<string> () {
-			"Idiot Bot",
-			"Learning Bot",
-			"Fancy Bot",
-			"Fighter Bot",
-			"Clossi Bot"
 
-		};
-	}
 
 	/// <summary>
 	/// Initializes the room settings.
@@ -156,12 +144,8 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 			.UpdatePlayers ((string)PhotonNetwork.CurrentRoom.CustomProperties[rpk.playerOneName]
 				, (string)PhotonNetwork.CurrentRoom.CustomProperties[rpk.playerTwoName], 0, 0);
 
-		gameMenu.GetComponent<SubMenu> ().JoinRoom (PhotonNetwork.CurrentRoom.Name);
-	}
-
-	private void InitializeCaptureGoBotSettings (int botLevel)
-	{
-		OnPlayerJoined (botNames[botLevel]);
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+		gameMenu.GetComponent<SubMenu> ().JoinRoom (PhotonNetwork.CurrentRoom.Name, (int)hash[rpk.ruleSet]);
 	}
 
 	// Player joined
@@ -524,6 +508,48 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	// Bot Functions
 	//**************************
 
+	private void InitializeCaptureGoBotSettings (int botLevel)
+	{
+		GameObject.Find ("LocalRoomSettings").GetComponent<LocalRoomSettings> ().LoadBotSettings (botLevel);
+		InitializeRoom ();
+
+		string botName = GameObject.Find ("BotManager").GetComponent<AIScript> ().GetBotName (botLevel);
+		players = new List<string> ();
+		players.Add (PhotonNetwork.NickName);
+		players.Add (botName);
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		hash [rpk.playerTwoName] = botName;
+		hash [rpk.activeGame] = true;
+		hash [rpk.botLevel] = botLevel;
+
+		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
+
+		GameRoomSetup (players [0], players [1], playerColors [0], playerColors [1]);
+
+		stoneManger.GetComponent<StoneManagerScript> ().InitializeStones ();
+
+		InitializeSubMenu ();
+
+		StartGameForBot(botLevel);
+	}
+
+	public void StartGameForBot (int botLevel)
+	{
+		ResetCurrentTurn(0);
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		GameObject.Find ("SoundManager").GetComponent<SoundManagerScript> ().PlayBackgroundTwo ();
+		GameObject.Find ("GameMenu").GetComponent<SubMenu> ().ChangeSubMenuActive (false);
+
+		if (players[(int)hash[rpk.currentTurn]] != PhotonNetwork.NickName)
+		{
+			GetBotMove ((int)hash[rpk.botLevel]);
+		}
+	}
+
 	// Wait for move to load before playing bot move.
 	private void GetBotMove (int botLevel)
 	{
@@ -546,7 +572,8 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		Debug.Log ("Bot Move: " + move);
 
-		PlayMoveOverNetwork (move, (string)botNames [(int)hash[rpk.botLevel]]);
+		string botName = botManager.GetComponent<AIScript> ().GetBotName ((int)hash[rpk.botLevel]);
+		PlayMoveOverNetwork (move, botName);
 
 	}
 

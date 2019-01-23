@@ -5,6 +5,29 @@ using UnityEngine.UI;
 
 public class AIScript : MonoBehaviour {
 
+	List<string> botNames;
+
+	private void Start ()
+	{
+		InitializeBotNames ();
+	}
+
+	private void InitializeBotNames ()
+	{
+		botNames = new List<string> () {
+			"Idiot Bot",
+			"Learning Bot",
+			"Fancy Bot",
+			"Fighter Bot",
+			"Clossi Bot"
+		};
+	}
+
+	public string GetBotName (int botLevel)
+	{
+		return botNames[botLevel];
+	}
+
     // This script is to be used to help the AI decide
     // where to play.
     // This AI plays capture Go.
