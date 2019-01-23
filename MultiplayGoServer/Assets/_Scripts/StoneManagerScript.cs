@@ -220,13 +220,17 @@ public class StoneManagerScript : MonoBehaviour {
 
 		stones = new List<Stone> ();
 
-		if (set == 0) 
+		if (set == 0){return;}
+
+		else if (set == 1) 
 		{
 			Debug.Log ("Loading Stones.");
 			CreateStone ("E6", 0);
 			CreateStone ("E4", 0);
 			CreateStone ("D5", 0);
 			CreateStone ("E5", 1);
+
+			DeactivateMarker (stones.Count-1);
 		}
 	}
 		
@@ -236,10 +240,15 @@ public class StoneManagerScript : MonoBehaviour {
 	{
 		for (int i=0; i<stones.Count-1; i++)
 		{
-			GameObject stone = stones [i].stone;
+			DeactivateMarker (i);
+		}
+	}
 
-			GameObject marker = (GameObject)stone.transform.GetChild (0).gameObject;
-			marker.SetActive (false);
+	private void DeactivateMarker (int index)
+	{
+		if (index >= 0 && index < stones.Count)
+		{
+			stones [index].stone.transform.GetChild (0).gameObject.SetActive (false);
 		}
 	}
 }

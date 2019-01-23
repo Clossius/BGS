@@ -3560,6 +3560,7 @@ MonoBehaviour:
   name: {fileID: 649244684}
   image: {fileID: 843032555}
   character1: {fileID: 21300002, guid: 81fc49b634681a042b2969f7875c65e3, type: 3}
+  character2: {fileID: 21300020, guid: 92bee472b54649345913339ab8bbaafd, type: 3}
 --- !u!1 &1191567493
 GameObject:
   m_ObjectHideFlags: 0
