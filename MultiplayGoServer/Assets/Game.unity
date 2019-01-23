@@ -2080,7 +2080,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 13.4
+  m_fontSize: 14.65
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2590,7 +2590,7 @@ MonoBehaviour:
     spaceCount: 12
     wordCount: 12
     linkCount: 0
-    lineCount: 5
+    lineCount: 4
     pageCount: 1
     materialCount: 1
   m_havePropertiesChanged: 0
@@ -3561,6 +3561,7 @@ MonoBehaviour:
   image: {fileID: 843032555}
   character1: {fileID: 21300002, guid: 81fc49b634681a042b2969f7875c65e3, type: 3}
   character2: {fileID: 21300020, guid: 92bee472b54649345913339ab8bbaafd, type: 3}
+  character3: {fileID: 21300002, guid: 2b20d71550d86154d9905c0b7b83afa2, type: 3}
 --- !u!1 &1191567493
 GameObject:
   m_ObjectHideFlags: 0
@@ -3646,7 +3647,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 19.65
+  m_fontSize: 21.4
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5781,7 +5782,7 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 13.4
+  m_fontSize: 14.65
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

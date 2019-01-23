@@ -232,6 +232,17 @@ public class StoneManagerScript : MonoBehaviour {
 
 			DeactivateMarker (stones.Count-1);
 		}
+
+		else if (set == 2) 
+		{
+			Debug.Log ("Loading Stones.");
+			CreateStone ("D4", 0);
+			CreateStone ("D6", 0);
+			CreateStone ("F4", 0);
+			CreateStone ("F6", 0);
+
+			DeactivateMarker (stones.Count-1);
+		}
 	}
 		
 	// Deactivates the marker above the stones

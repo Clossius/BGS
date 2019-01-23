@@ -574,7 +574,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 	}
 
-	public void StartGameForCampaign (string botName, int stoneSettings)
+	public void StartGameForCampaign (string botName, int stoneSettings, int botLevel)
 	{
 		InitializeRoom ();
 
@@ -591,6 +591,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		hash [rpk.currentTurn] = 0;
 		hash [rpk.playerTwoName] = botName;
 		hash [rpk.activeGame] = true;
+		hash [rpk.botLevel] = botLevel;
 
 		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 
