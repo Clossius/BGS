@@ -289,13 +289,21 @@ public class LibertyManager : MonoBehaviour {
 		bool capturing = false;
 
 		List<string> movesToCheck = GetTouchingCoordinates (move, boardSize);
+		Stone stone = GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ().GetStone (move);
+		int color = stone.color;
+
 		for (int i=0; i<movesToCheck.Count;i++)
 		{
 			bool moveExist = CheckMoveExist (movesToCheck[i], stones);
 			if(moveExist)
 			{
-				int liberties = GetLiberties (movesToCheck[i], stones, boardSize);
-				if(liberties == 0){ capturing = true;}
+				stone = GameObject.Find ("_StoneManager").GetComponent<StoneManagerScript> ().GetStone (movesToCheck[i]);
+
+				if (stone.color != color)
+				{
+					int liberties = GetLiberties (movesToCheck[i], stones, boardSize);
+					if(liberties == 0){ capturing = true;}
+				}
 			}
 		}
 
