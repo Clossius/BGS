@@ -18,8 +18,6 @@ public class GameButtonManager : MonoBehaviour
 	{
 		leaveButton.SetActive (false);
 		resignButton.SetActive (true);
-
-		GameObject.Find ("SoundManager").GetComponent<SoundManagerScript> ().PlayBackgroundTwo ();
 	}
 
 	public void ResetToDefault ()

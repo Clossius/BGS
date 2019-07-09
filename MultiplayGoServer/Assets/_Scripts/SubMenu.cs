@@ -34,12 +34,18 @@ public class SubMenu : MonoBehaviour {
 
 		GameObject.Find ("GameMenu").GetComponent<GameButtonManager> ().ResetToDefault ();
 
-		if (ruleSet == 2) {
+		if (ruleSet == 0) 
+		{
+			tutorialMenu.SetActive (false);
+			subMenu.SetActive (true);
+		}
+		else if (ruleSet == 2) {
 			tutorialMenu.SetActive (true);
 			subMenu.SetActive (false);
 		} else if (ruleSet == 1)
 		{
 			subMenu.SetActive (false);
+			tutorialMenu.SetActive (false);
 		}
 	}
 

@@ -42,10 +42,12 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	List<string> players;
 	bool botThinking = false;
 
+	//*********************
 	// Initialization
+	//*********************
+
 	void LoadRoomSettings ()
 	{
-		Debug.Log ("Start Function is being called.");
 		hash = new ExitGames.Client.Photon.Hashtable ();
 		rpk = new RoomPropertyKeys();
 		pv = this.GetComponent<PhotonView> ();
@@ -53,15 +55,6 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	}
 
 
-
-	/// <summary>
-	/// Initializes the room settings.
-	/// Takes in an int for the Game Mode.
-	/// 0 = Capture Go
-	/// 1 = Capture Go with Bot
-	/// </summary>
-	/// <param name="gameMode">Game mode.</param>
-	// Initialize the room settings.
 	public void InitializeRoomSettings ()
 	{
 		LoadRoomSettings ();
@@ -87,12 +80,13 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		hash = PhotonNetwork.CurrentRoom.CustomProperties;
 
-		if((int)hash[rpk.ruleSet] == 1){InitializeCaptureGoBotSettings ((int)hash[rpk.botLevel]);}
-		if((int)hash[rpk.ruleSet] == 2){InitializeCampaignSettings ();}
+		if((int)hash[rpk.ruleSet] == 0){InitializeCaptureGo ();}
+		else if((int)hash[rpk.ruleSet] == 1){InitializeCaptureGoBotSettings ((int)hash[rpk.botLevel]);}
+		else if((int)hash[rpk.ruleSet] == 2){InitializeCampaignSettings ();}
 	}
 
 	// Load the settings for the current room.
-	void InitializeRoom ()
+	private void InitializeRoom ()
 	{
 		LocalSettings localSettings = GameObject.Find ("LocalRoomSettings").GetComponent<LocalRoomSettings> ().localSettings;
 
@@ -148,43 +142,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		gameMenu.GetComponent<SubMenu> ().JoinRoom (PhotonNetwork.CurrentRoom.Name, (int)hash[rpk.ruleSet]);
 	}
 
-	// Player joined
-	public void OnPlayerJoined (string username)
-	{
-		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){LoadRoomSettings (); return;}
 
-		hash = PhotonNetwork.CurrentRoom.CustomProperties;
-		bool gameActive = (bool)hash[rpk.activeGame];
-
-		if (!gameActive)
-		{
-			hash [rpk.playerTwoName] = username;
-
-			if(PhotonNetwork.NickName == username){Debug.Log ("ERROR: Duplicate Usernames");}
-
-			hash [rpk.activeGame] = true;
-			hash [rpk.isVisible] = false;
-
-			PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
-
-			SetPlayerColors (2); // TODO: Set per room settings in the future for more than 2 players.
-			ResetCurrentTurn(0); // 0 is black. Change to default first color in the future.
-
-			players.Add ((string)hash[rpk.playerOneName]);
-			players.Add ((string)hash[rpk.playerTwoName]);
-
-			pv.RPC ("GameRoomSetup", RpcTarget.All, (string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName], playerColors[0], playerColors[1]);
-
-			if ((int)hash[rpk.ruleSet] == 1) // Playing a Bot.
-			{
-				GetBotMove ((int)hash[rpk.botLevel]);
-			}
-			else if ((int)hash[rpk.ruleSet] == 2) // Playing Campaign
-			{
-				InitializeCampaignSettings ();
-			}
-		}
-	}
 
 	// Set the colors of the players in the room.
 	private void SetPlayerColors (int maxPlayers)
@@ -214,6 +172,12 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
 	}
 
+
+
+	//*************************
+	// Active Game Functions
+	//*************************
+
 	// Call all the clients to set up the room
 	// settings in the sub menu.
 	[PunRPC]
@@ -227,6 +191,13 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		if (PhotonNetwork.NickName == pOne || PhotonNetwork.NickName == pTwo) 
 		{
 			gameMenu.GetComponent<GameButtonManager> ().GameStart ();
+		}
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+		if ((bool)hash[rpk.activeGame])
+		{
+			GameObject.Find ("SoundManager").GetComponent<SoundManagerScript> ().PlayBackgroundTwo ();
+			GameObject.Find ("GameMenu").GetComponent<SubMenu> ().ChangeSubMenuActive (false);
 		}
 	}
 
@@ -263,8 +234,10 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		}
 
 		// TODO: Add a way to load and save moves on the server.
+
 		Debug.Log("Playing move.");
 		Debug.Log (username + " "  + players[(int)hash[rpk.currentTurn]]);
+
 		if(username == players[(int)hash[rpk.currentTurn]])
 		{
 			// Check for legal move.
@@ -302,8 +275,9 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		//TODO: Set up a way to load the moves from the server
 		// in case of disconnection and rejoining or for viewers who join
 		// late.
+		stoneManger = GameObject.Find ("_StoneManager");
 		stoneManger.GetComponent<StoneManagerScript> ().CreateStone (move, color);
-		GameObject.Find ("_StoneManager").GetComponent<RaycastScript> ().ChangePlayingMove (false);
+		stoneManger.GetComponent<RaycastScript> ().ChangePlayingMove (false);
 
 		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){ return;}
 
@@ -504,6 +478,56 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 	}
 
 
+	//************************************
+	// Start a One on One Capture Go
+	//************************************
+
+	private void InitializeCaptureGo ()
+	{
+		if (!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){return;}
+
+		GameObject.Find ("LocalRoomSettings").GetComponent<LocalRoomSettings> ().LoadCaptureGoSettings();
+		InitializeRoom ();
+	}
+
+	private void StartCaptureGo ()
+	{
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+
+		hash [rpk.activeGame] = true;
+		hash [rpk.isVisible] = false;
+
+		SetPlayerColors (2); // TODO: Set per room settings in the future for more than 2 players.
+		ResetCurrentTurn(0); // 0 is black. Change to default first color in the future.
+
+		players.Add ((string)hash[rpk.playerOneName]);
+		players.Add ((string)hash[rpk.playerTwoName]);
+
+		pv.RPC ("GameRoomSetup", RpcTarget.All, (string)hash[rpk.playerOneName], (string)hash[rpk.playerTwoName], playerColors[0], playerColors[1]);
+
+
+	}
+
+	// Player joined
+	public void OnPlayerJoined (string username)
+	{
+		if(!PhotonNetwork.IsMasterClient || !PhotonNetwork.IsConnected){LoadRoomSettings (); return;}
+
+		hash = PhotonNetwork.CurrentRoom.CustomProperties;
+		bool gameActive = (bool)hash[rpk.activeGame];
+
+		if (!gameActive)
+		{
+			hash [rpk.playerTwoName] = username;
+
+			if(PhotonNetwork.NickName == username){Debug.Log ("ERROR: Duplicate Usernames"); return;}
+
+			PhotonNetwork.CurrentRoom.SetCustomProperties (hash, null, null);
+
+			StartCaptureGo ();
+		}
+	}
+
 	//**************************
 	// Bot Functions
 	//**************************
@@ -543,6 +567,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 
 		GameObject.Find ("SoundManager").GetComponent<SoundManagerScript> ().PlayBackgroundTwo ();
 		GameObject.Find ("GameMenu").GetComponent<SubMenu> ().ChangeSubMenuActive (false);
+		GameObject.Find ("GameMenu").GetComponent<GameButtonManager> ().GameStart ();
 
 		if (players[(int)hash[rpk.currentTurn]] != PhotonNetwork.NickName)
 		{
@@ -626,6 +651,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		stoneManger.GetComponent<StoneManagerScript> ().LoadSpecificStoneSet (stoneSettings);
 
 		GameObject.Find ("SoundManager").GetComponent<SoundManagerScript> ().PlayBackgroundTwo ();
+		GameObject.Find ("GameMenu").GetComponent<GameButtonManager> ().GameStart ();
 	}
 
 	private void GameOverForCampaign (string winner)
@@ -639,6 +665,7 @@ public class RoomManager : MonoBehaviourPunCallbacks {
 		}
 
 		GameObject.Find ("SoundManager").GetComponent<SoundManagerScript> ().PlayBackgroundOne ();
+		GameObject.Find ("GameMenu").GetComponent<GameButtonManager> ().ResetToDefault ();
 	}
 
 	private void TutorialMove ()
