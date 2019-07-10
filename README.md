@@ -2,6 +2,8 @@
 
 Renammed BGS to CGS (Clossi Go Server) as I'm not sure what direction this server will take and I can always change the name later. Right now this will be my hobby and CGS will make it so I can put whatever I want into the server until it becomes something on it's own. I still want to make it beginner friendly though.
 
+Progress & Work Flow: https://trello.com/b/0jI6VKnY
+
 IMPORTANT!! For those who want to download and test builds from GitHub or even help develop, PLEASE change the version type. If you need help with this, message me on Discord. If you do not do this, it can effect my debug testing and slow down the build process. I appreciate all help, but please change the version before changing anything or testing anything while I am working on it.
 
 Download the game here: https://clossius.itch.io/bgs
